@@ -1,0 +1,59 @@
+# BLADNA — local / single-node stack: PostgreSQL 16 + the web app (+ optional Redis).
+#
+# Quickstart:  docker compose up --build
+# Migrations are NOT run automatically. Apply them once the database is up:
+#
+#     docker compose run --rm app npm run db:migrate:deploy
+#
+# (or `npm run db:migrate:deploy` from a local checkout with DATABASE_URL
+# pointing at this database; optional demo data: `npm run db:seed`).
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: bladna
+      POSTGRES_PASSWORD: change-me
+      POSTGRES_DB: bladna
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U bladna -d bladna']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # Same shape as the POSTGRES_* credentials above; the service name `db`
+      # is the hostname inside the compose network.
+      DATABASE_URL: postgresql://bladna:change-me@db:5432/bladna
+      AUTH_SECRET: change-me-compose-auth-secret-at-least-32-characters
+      DEMO_MODE: 'true'
+      EMAIL_DRIVER: console
+      # Redis is optional — the app uses in-process queue/cache adapters when
+      # REDIS_URL is empty. Enable the redis service (profile below) and set:
+      # REDIS_URL: redis://redis:6379
+
+  # Optional queue/cache backend — excluded from the default `up`, start with:
+  #   docker compose --profile optional up -d redis
+  redis:
+    image: redis:7-alpine
+    profiles: ['optional']
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  pgdata:

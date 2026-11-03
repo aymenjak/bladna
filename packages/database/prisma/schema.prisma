@@ -1,0 +1,3132 @@
+// BLADNA — Prisma schema
+// PostgreSQL. UUID primary keys. Audit-sensitive records are append-only or soft-deleted.
+// Conventions:
+//   * every important entity: id, createdAt, updatedAt
+//   * localized fields: nameAr / nameFr / nameEn (or titleAr / ...)
+//   * history tables are append-only (never updated once completed)
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────────────────────────────
+
+enum Locale {
+  AR
+  FR
+  EN
+}
+
+enum UserStatus {
+  ACTIVE
+  PENDING_VERIFICATION
+  SUSPENDED
+  BANNED
+  DELETED
+}
+
+enum SystemRole {
+  USER
+  VOLUNTEER
+  ORGANIZATION_MEMBER
+  ORGANIZATION_ADMIN
+  ORGANIZATION_OWNER
+  SPONSOR_MEMBER
+  SPONSOR_ADMIN
+  MODERATOR
+  VERIFICATION_OFFICER
+  SUPPORT
+  SUPER_ADMIN
+}
+
+enum AuthTokenType {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
+  CHANGE_EMAIL
+}
+
+enum OrgMemberRole {
+  OWNER
+  ADMIN
+  MANAGER
+  STAFF
+  VIEWER
+}
+
+enum OrgMemberStatus {
+  INVITED
+  ACTIVE
+  SUSPENDED
+  REMOVED
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+  REVOKED
+}
+
+enum OrganizationType {
+  ASSOCIATION
+  NGO
+  FOUNDATION
+  EDUCATIONAL_INSTITUTION
+  YOUTH_ORGANIZATION
+  COMMUNITY_INITIATIVE
+  COMPANY
+  PUBLIC_INSTITUTION
+  OTHER
+}
+
+enum OrganizationStatus {
+  PENDING_VERIFICATION
+  ACTIVE
+  SUSPENDED
+  ARCHIVED
+}
+
+enum VerificationStatus {
+  PENDING
+  UNDER_REVIEW
+  VERIFIED
+  REJECTED
+  SUSPENDED
+  EXPIRED
+}
+
+enum TrustLevel {
+  LEVEL_0_UNVERIFIED
+  LEVEL_1_BASIC_VERIFIED
+  LEVEL_2_ORGANIZATION_VERIFIED
+  LEVEL_3_TRUSTED_PARTNER
+  LEVEL_4_STRATEGIC_PARTNER
+}
+
+enum OpportunityType {
+  LOCAL
+  NATIONAL
+  ONLINE
+  INTERNATIONAL
+  EVENT
+  CAMPAIGN
+}
+
+enum LocationType {
+  PHYSICAL
+  ONLINE
+  HYBRID
+}
+
+enum OpportunityStatus {
+  DRAFT
+  PENDING_REVIEW
+  PUBLISHED
+  REJECTED
+  SUSPENDED
+  EXPIRED
+  ARCHIVED
+}
+
+enum BenefitType {
+  ACCOMMODATION
+  FOOD
+  TRANSPORTATION
+  INSURANCE
+  TRAINING
+  CERTIFICATE
+  OTHER
+}
+
+enum BenefitValue {
+  INCLUDED
+  NOT_INCLUDED
+  UNKNOWN
+}
+
+// International volunteering (BLADNA International, spec §6/§9/§4).
+enum InternationalProjectType {
+  VOLUNTEERING
+  YOUTH_EXCHANGE
+  COMMUNITY_PROJECT
+  ENVIRONMENTAL_PROJECT
+  HUMANITARIAN_PROJECT
+  EDUCATIONAL_PROJECT
+  CULTURAL_PROJECT
+  SPORT_PROJECT
+  DIGITAL_VOLUNTEERING
+  EMERGENCY_RESPONSE
+  INTERNATIONAL_CAMP
+  OTHER
+}
+
+enum InternationalApplicationStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  SHORTLISTED
+  INTERVIEW
+  ACCEPTED
+  WAITLISTED
+  REJECTED
+  WITHDRAWN
+  COMPLETED
+}
+
+enum InternationalPassportReadiness {
+  READY
+  IN_PROGRESS
+  NOT_AVAILABLE
+}
+
+enum RequirementType {
+  DOCUMENT
+  EXPERIENCE
+  AVAILABILITY
+  AGE
+  EDUCATION
+  OTHER
+}
+
+enum QuestionType {
+  TEXT
+  MULTILINE
+  CHOICE
+  BOOLEAN
+}
+
+enum ApplicationStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  ACCEPTED
+  WAITLISTED
+  REJECTED
+  WITHDRAWN
+  COMPLETED
+  NO_SHOW
+}
+
+enum ActivityStatus {
+  PLANNED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum AttendanceMethod {
+  QR
+  MANUAL
+  ORGANIZATION
+  IMPORT
+}
+
+enum AttendanceStatus {
+  PENDING_CONFIRMATION
+  CONFIRMED
+  REJECTED
+  ABSENT
+}
+
+enum HourStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+  REVOKED
+}
+
+enum HourSource {
+  ATTENDANCE
+  MANUAL
+  IMPORT
+  EVENT
+}
+
+enum CertificateStatus {
+  VALID
+  REVOKED
+  EXPIRED
+}
+
+enum SkillVerificationLevel {
+  SELF_DECLARED
+  ORGANIZATION_VERIFIED
+  CERTIFICATE_VERIFIED
+}
+
+enum LanguageLevel {
+  BEGINNER
+  ELEMENTARY
+  INTERMEDIATE
+  UPPER_INTERMEDIATE
+  ADVANCED
+  NATIVE
+}
+
+enum AvailabilitySlot {
+  WEEKDAYS
+  WEEKENDS
+  EVENINGS
+  NIGHTS
+  HOLIDAYS
+  FLEXIBLE
+}
+
+enum VolunteerVerificationStatus {
+  UNVERIFIED
+  BASIC_VERIFIED
+  IDENTITY_VERIFIED
+}
+
+enum CardStatus {
+  ACTIVE
+  EXPIRED
+  REVOKED
+}
+
+enum SourceType {
+  OFFICIAL
+  VERIFIED_PARTNER
+  EXTERNAL
+}
+
+// Which eligibility path qualified a review author for that initiative (P24):
+// an ACCEPTED application ("participant") or VERIFIED hours tied to it.
+// Recorded at write time so the provenance badge survives later re-checks.
+enum ReviewSource {
+  PARTICIPANT
+  HOURS
+}
+
+enum CampaignStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  COMPLETED
+  CANCELLED
+  ARCHIVED
+}
+
+enum ContributionStatus {
+  PENDING
+  CONFIRMED
+  REJECTED
+}
+
+enum ParticipationStatus {
+  REGISTERED
+  ACTIVE
+  COMPLETED
+  WITHDRAWN
+}
+
+enum MetricType {
+  VOLUNTEERS
+  HOURS
+  BENEFICIARIES
+  ACTIVITIES
+  WILAYAS
+  SCHOOLS
+  TREES
+  DONATIONS
+  OTHER
+}
+
+enum ProgramStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  COMPLETED
+  ARCHIVED
+}
+
+enum SponsorshipStatus {
+  PROPOSED
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum SponsorshipKind {
+  CASH
+  IN_KIND
+}
+
+enum SponsorStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  ARCHIVED
+}
+
+enum PlanTier {
+  FREE
+  BASIC
+  PROFESSIONAL
+  ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELLED
+  EXPIRED
+}
+
+enum InvoiceStatus {
+  DRAFT
+  ISSUED
+  PAID
+  OVERDUE
+  VOID
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  SUCCEEDED
+  FAILED
+  REFUNDED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  BANK_TRANSFER
+  MANUAL_PAYMENT
+  CARD
+  LOCAL_PAYMENT_GATEWAY
+  OTHER_PROVIDER
+}
+
+enum ReportStatus {
+  OPEN
+  INVESTIGATING
+  ACTION_TAKEN
+  DISMISSED
+  CLOSED
+}
+
+enum ReportTargetType {
+  USER
+  ORGANIZATION
+  OPPORTUNITY
+  CAMPAIGN
+  MESSAGE
+  CERTIFICATE
+  INTERNATIONAL_OPPORTUNITY
+}
+
+enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum RecommendedAction {
+  AUTO_APPROVE
+  QUEUE_FOR_REVIEW
+  RESTRICT
+  SUSPEND
+}
+
+enum RiskTargetType {
+  USER
+  ORGANIZATION
+  OPPORTUNITY
+  CAMPAIGN
+  PAYMENT
+}
+
+enum NotificationType {
+  APPLICATION_SUBMITTED
+  APPLICATION_ACCEPTED
+  APPLICATION_REJECTED
+  APPLICATION_UNDER_REVIEW
+  OPPORTUNITY_REMINDER
+  DEADLINE_REMINDER
+  HOURS_VERIFIED
+  HOURS_REJECTED
+  CERTIFICATE_ISSUED
+  ORGANIZATION_VERIFIED
+  ORGANIZATION_REJECTED
+  CAMPAIGN_UPDATE
+  NEW_MATCHING_OPPORTUNITY
+  MESSAGE_RECEIVED
+  SECURITY_ALERT
+  SYSTEM
+  // International additions (spec §32) — deadline/certificate reminders reuse
+  // DEADLINE_REMINDER / CERTIFICATE_ISSUED above.
+  APPLICATION_STATUS_CHANGED
+  INTERVIEW_INVITATION
+  INTERNATIONAL_OPPORTUNITY_MATCH
+  DOCUMENT_EXPIRING
+  PROGRAM_START_REMINDER
+  PROGRAM_END_REMINDER
+  INTERNATIONAL_PARTICIPATION_VERIFIED
+  // Partnerships & CSR ecosystem (P33): partnership-specific events only —
+  // deadline/reminder equivalents reuse DEADLINE_REMINDER above.
+  PARTNERSHIP_MATCH
+  PARTNERSHIP_REQUEST
+  PROPOSAL_RECEIVED
+  PROPOSAL_ACCEPTED
+  PROPOSAL_REJECTED
+  AGREEMENT_SIGNED
+  FUNDING_COMMITTED
+  FUNDING_DISBURSED
+  EVIDENCE_REQUIRED
+  IMPACT_VERIFICATION
+  REPORT_READY
+}
+
+enum NotificationChannel {
+  IN_APP
+  EMAIL
+  PUSH
+  SMS
+}
+
+enum DeliveryStatus {
+  QUEUED
+  SENT
+  FAILED
+  SKIPPED
+}
+
+enum ConversationType {
+  DIRECT
+  ORGANIZATION
+  GROUP
+}
+
+enum DocumentType {
+  AVATAR
+  LOGO
+  COVER_IMAGE
+  IDENTITY
+  ORGANIZATION_REGISTRATION
+  VERIFICATION_EVIDENCE
+  CERTIFICATE
+  ATTACHMENT
+  OTHER
+}
+
+enum DocumentStatus {
+  PENDING_SCAN
+  QUARANTINED
+  AVAILABLE
+  REJECTED
+  DELETED
+}
+
+enum DocumentVisibility {
+  PRIVATE
+  ORGANIZATION
+  PUBLIC
+}
+
+enum DataRequestType {
+  EXPORT
+  DEACTIVATE
+  DELETE
+}
+
+enum DataRequestStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  REJECTED
+}
+
+enum IncidentType {
+  SECURITY
+  FRAUD
+  ABUSE
+  SAFETY
+  MISCONDUCT
+  OTHER
+}
+
+enum IncidentSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum IncidentStatus {
+  OPEN
+  INVESTIGATING
+  RESOLVED
+  CLOSED
+}
+
+enum ContentStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum ContentType {
+  PAGE
+  FAQ
+  GUIDE
+  SAFETY
+  LEGAL
+}
+
+enum PlacementSection {
+  HOME_HERO
+  HOME_FEATURED_OPPORTUNITIES
+  HOME_FEATURED_ORGANIZATIONS
+  HOME_CAMPAIGNS
+  DISCOVER_FEATURED
+}
+
+// ─────────────────────────────────────────────────────────────
+// GEOGRAPHY
+// ─────────────────────────────────────────────────────────────
+
+model Country {
+  id        String   @id @default(dbgenerated("gen_random_uuid()"))
+  code      String   @unique // ISO-3166-1 alpha-2
+  nameAr    String
+  nameFr    String
+  nameEn    String
+  createdAt DateTime @default(now())
+
+  wilayas                  Wilaya[]
+  opportunities            Opportunity[]
+  organizations            Organization[]
+  internationalOffers      InternationalOpportunity[]
+  internationalExperiences InternationalExperience[]
+  preferredByVolunteers    VolunteerProfile[]
+}
+
+model Wilaya {
+  id        String   @id @default(dbgenerated("gen_random_uuid()"))
+  code      String   @unique // Algerian wilaya code ("16" …)
+  nameAr    String
+  nameFr    String
+  nameEn    String
+  countryId String
+  country   Country  @relation(fields: [countryId], references: [id])
+  createdAt DateTime @default(now())
+
+  cities               City[]
+  volunteerProfiles    VolunteerProfile[]
+  opportunities        Opportunity[]
+  organizations        Organization[]
+  economicProfileLinks EconomicProfileWilaya[]
+}
+
+model City {
+  id        String   @id @default(dbgenerated("gen_random_uuid()"))
+  nameAr    String
+  nameFr    String
+  nameEn    String
+  wilayaId  String
+  wilaya    Wilaya   @relation(fields: [wilayaId], references: [id])
+  latitude  Float?
+  longitude Float?
+  createdAt DateTime @default(now())
+
+  volunteerProfiles VolunteerProfile[]
+  opportunities     Opportunity[]
+  organizations     Organization[]
+}
+
+// ─────────────────────────────────────────────────────────────
+// USERS & AUTH
+// ─────────────────────────────────────────────────────────────
+
+model User {
+  id                String       @id @default(dbgenerated("gen_random_uuid()"))
+  email             String       @unique // lowercased
+  phone             String?      @unique
+  passwordHash      String
+  firstName         String
+  lastName          String
+  dateOfBirth       DateTime?
+  profileImage      String?
+  preferredLanguage Locale       @default(AR)
+  roles             SystemRole[] @default([USER])
+  status            UserStatus   @default(ACTIVE)
+  emailVerifiedAt   DateTime?
+  phoneVerifiedAt   DateTime?
+  lastLoginAt       DateTime?
+  suspendedUntil    DateTime?
+  suspendReason     String?
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  deletedAt         DateTime?
+
+  volunteerProfile      VolunteerProfile?
+  memberships           OrganizationMember[]
+  sponsorMemberships    SponsorMember[]
+  sessions              Session[]
+  authTokens            AuthToken[]
+  twoFactor             TwoFactorSecret?
+  recoveryCodes         RecoveryCode[]
+  notifications         Notification[]
+  prefs                 NotificationPreference[]
+  auditLogs             AuditLog[]               @relation("AuditActor")
+  campaignContributions CampaignContribution[]
+  supportOffers         SupportOffer[]
+  opportunityReviews    OpportunityReview[]
+  adminActions          AdminAction[]
+  reportsFiled          Report[]                 @relation("ReportReporter")
+  reportsAssigned       Report[]                 @relation("ReportAssignee")
+  consent               PrivacyConsent[]
+  dataRequests          DataAccessRequest[]
+  deletionRequests      DeletionRequest[]
+  blocked               UserBlock[]              @relation("Blocker")
+  blockedBy             UserBlock[]              @relation("Blocked")
+  conversations         ConversationMember[]
+  messages              Message[]
+  analyticsEvents       AnalyticsEvent[]
+  documents             Document[]
+  incidentsReported     Incident[]               @relation("IncidentReporter")
+  incidentsAssigned     Incident[]               @relation("IncidentAssignee")
+  invitedByMe           OrganizationInvitation[] @relation("InvitationActor")
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+model Session {
+  id                       String    @id @default(dbgenerated("gen_random_uuid()"))
+  userId                   String
+  user                     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  familyId                 String // refresh-token rotation family (reuse detection)
+  accessTokenId            String    @unique // jti of the current access token chain
+  refreshTokenHash         String    @unique // sha256 of the refresh token — never store raw tokens
+  // Previous rotation's hash: presenting it again means the token was stolen/leaked → revoke the whole family.
+  previousRefreshTokenHash String?
+  userAgent                String?
+  ipAddress                String?
+  lastUsedAt               DateTime  @default(now())
+  expiresAt                DateTime
+  revokedAt                DateTime?
+  revokedReason            String?
+  // Step-up auth: set when TOTP was verified for this session (login or re-auth).
+  mfaSatisfiedAt           DateTime?
+  createdAt                DateTime  @default(now())
+
+  @@index([userId])
+  @@index([familyId])
+  @@index([expiresAt])
+  @@index([previousRefreshTokenHash])
+}
+
+model AuthToken {
+  id         String        @id @default(dbgenerated("gen_random_uuid()"))
+  userId     String
+  user       User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type       AuthTokenType
+  tokenHash  String        @unique
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime      @default(now())
+
+  @@index([userId, type])
+}
+
+model TwoFactorSecret {
+  id        String    @id @default(dbgenerated("gen_random_uuid()"))
+  userId    String    @unique
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  secretEnc String // encrypted at rest (never logged, never returned)
+  enabledAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model RecoveryCode {
+  id        String    @id @default(dbgenerated("gen_random_uuid()"))
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  codeHash  String
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+}
+
+// ─────────────────────────────────────────────────────────────
+// VOLUNTEER IDENTITY
+// ─────────────────────────────────────────────────────────────
+
+model VolunteerProfile {
+  id                      String                         @id @default(dbgenerated("gen_random_uuid()"))
+  userId                  String                         @unique
+  user                    User                           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bio                     String?
+  wilayaId                String?
+  wilaya                  Wilaya?                        @relation(fields: [wilayaId], references: [id])
+  cityId                  String?
+  city                    City?                          @relation(fields: [cityId], references: [id])
+  availability            AvailabilitySlot[]             @default([])
+  onlinePreference        Boolean                        @default(false)
+  internationalPreference Boolean                        @default(false)
+  // International volunteering profile (spec §4) — all optional; passport
+  // *numbers* are never stored here (only a readiness status, §4/§50).
+  preferredCategories     InternationalProjectType[]     @default([])
+  passportReadiness       InternationalPassportReadiness @default(NOT_AVAILABLE)
+  travelReady             Boolean                        @default(false)
+  emergencyContactReady   Boolean                        @default(false)
+  publicProfile           Boolean                        @default(false)
+  publicPhone             Boolean                        @default(false)
+  publicEmail             Boolean                        @default(false)
+  // Per-field visibility inside an opted-in public profile (spec §30). Defaults
+  // preserve the pre-existing behavior (wilaya + hours were always shown on
+  // public surfaces); contact flags above stay opt-in false.
+  showWilaya              Boolean                        @default(true)
+  showHours               Boolean                        @default(true)
+  showCertificates        Boolean                        @default(true)
+  volunteerId             String                         @unique // e.g. BLD-ALG-000001 (format configurable)
+  publicToken             String                         @unique // non-guessable /verify/volunteer/[token]
+  verificationStatus      VolunteerVerificationStatus    @default(UNVERIFIED)
+  dateOfBirth             DateTime?
+  createdAt               DateTime                       @default(now())
+  updatedAt               DateTime                       @updatedAt
+
+  skills                    VolunteerSkill[]
+  languages                 VolunteerLanguage[]
+  interests                 VolunteerInterest[]
+  activities                VolunteerActivity[]
+  hours                     VolunteerHour[]
+  certificates              VolunteerCertificate[]
+  achievements              VolunteerAchievement[]
+  card                      VolunteerCard?
+  applications              OpportunityApplication[]
+  attendance                Attendance[]
+  saved                     SavedOpportunity[]
+  participations            CampaignParticipant[]
+  experiences               InternationalExperience[]
+  internationalApplications InternationalApplication[]
+  preferredCountries        Country[]
+
+  @@index([wilayaId])
+  @@index([verificationStatus])
+  @@index([createdAt])
+  // 0002 created this GIN index in raw SQL; P33's diff surfaced the
+  // undeclared index and dropped it — declared now so it survives diffs.
+  // Availability searches (`hasAny`/`@>`) need GIN, not btree.
+  @@index([availability], type: Gin)
+}
+
+model Skill {
+  id       String  @id @default(dbgenerated("gen_random_uuid()"))
+  nameAr   String
+  nameFr   String
+  nameEn   String
+  category String
+  active   Boolean @default(true)
+
+  volunteers    VolunteerSkill[]
+  opportunities OpportunitySkill[]
+
+  @@index([category, active])
+}
+
+model VolunteerSkill {
+  id                       String                 @id @default(dbgenerated("gen_random_uuid()"))
+  volunteerProfileId       String
+  volunteerProfile         VolunteerProfile       @relation(fields: [volunteerProfileId], references: [id], onDelete: Cascade)
+  skillId                  String
+  skill                    Skill                  @relation(fields: [skillId], references: [id])
+  verificationLevel        SkillVerificationLevel @default(SELF_DECLARED)
+  verifiedByOrganizationId String?
+  verifiedByOrganization   Organization?          @relation(fields: [verifiedByOrganizationId], references: [id])
+  verifiedAt               DateTime?
+  source                   String? // e.g. "self" | organization slug | certificate number
+  yearsExperience          Int?
+  createdAt                DateTime               @default(now())
+
+  @@unique([volunteerProfileId, skillId])
+  @@index([skillId])
+}
+
+model Language {
+  id     String @id @default(dbgenerated("gen_random_uuid()"))
+  code   String @unique // ar, fr, en, es, ...
+  nameAr String
+  nameFr String
+  nameEn String
+
+  volunteers    VolunteerLanguage[]
+  opportunities OpportunityLanguage[]
+}
+
+model VolunteerLanguage {
+  id                 String           @id @default(dbgenerated("gen_random_uuid()"))
+  volunteerProfileId String
+  volunteerProfile   VolunteerProfile @relation(fields: [volunteerProfileId], references: [id], onDelete: Cascade)
+  languageId         String
+  language           Language         @relation(fields: [languageId], references: [id])
+  level              LanguageLevel    @default(INTERMEDIATE)
+  createdAt          DateTime         @default(now())
+
+  @@unique([volunteerProfileId, languageId])
+}
+
+model Interest {
+  id     String  @id @default(dbgenerated("gen_random_uuid()"))
+  code   String  @unique // environment, education, health, ...
+  nameAr String
+  nameFr String
+  nameEn String
+  active Boolean @default(true)
+
+  volunteers VolunteerInterest[]
+}
+
+model VolunteerInterest {
+  id                 String           @id @default(dbgenerated("gen_random_uuid()"))
+  volunteerProfileId String
+  volunteerProfile   VolunteerProfile @relation(fields: [volunteerProfileId], references: [id], onDelete: Cascade)
+  interestId         String
+  interest           Interest         @relation(fields: [interestId], references: [id])
+  createdAt          DateTime         @default(now())
+
+  @@unique([volunteerProfileId, interestId])
+}
+
+model VolunteerActivity {
+  id                 String           @id @default(dbgenerated("gen_random_uuid()"))
+  volunteerProfileId String
+  volunteerProfile   VolunteerProfile @relation(fields: [volunteerProfileId], references: [id], onDelete: Cascade)
+  organizationId     String
+  organization       Organization     @relation(fields: [organizationId], references: [id])
+  opportunityId      String?
+  opportunity        Opportunity?     @relation(fields: [opportunityId], references: [id])
+  campaignId         String?
+  campaign           Campaign?        @relation(fields: [campaignId], references: [id])
+  title              String
+  description        String?
+  startedAt          DateTime
+  endedAt            DateTime?
+  status             ActivityStatus   @default(PLANNED)
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  hours        VolunteerHour[]
+  attendance   Attendance[]
+  certificates VolunteerCertificate[]
+
+  @@index([volunteerProfileId, status])
+  @@index([organizationId])
+  @@index([opportunityId])
+}
+
+model VolunteerHour {
+  id                 String             @id @default(dbgenerated("gen_random_uuid()"))
+  volunteerProfileId String
+  volunteerProfile   VolunteerProfile   @relation(fields: [volunteerProfileId], references: [id], onDelete: Cascade)
+  organizationId     String
+  organization       Organization       @relation(fields: [organizationId], references: [id])
+  activityId         String?
+  activity           VolunteerActivity? @relation(fields: [activityId], references: [id])
+  attendanceId       String?            @unique
+  attendance         Attendance?        @relation(fields: [attendanceId], references: [id])
+  hours              Decimal            @db.Decimal(6, 2) // > 0 enforced by CHECK constraint
+  date               DateTime           @db.Timestamp(3)
+  status             HourStatus         @default(PENDING)
+  source             HourSource         @default(ATTENDANCE)
+  verifiedById       String?
+  verifiedAt         DateTime?
+  rejectReason       String?
+  revokedAt          DateTime?
+  revokeReason       String?
+  supersedesId       String? // append-only corrections: revoked → new record points here
+  supersedes         VolunteerHour?     @relation("HourSupersede", fields: [supersedesId], references: [id])
+  supersededBy       VolunteerHour[]    @relation("HourSupersede")
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  @@index([volunteerProfileId, status])
+  @@index([organizationId, status])
+  @@index([activityId])
+  @@index([date])
+}
+
+model Achievement {
+  id             String   @id @default(dbgenerated("gen_random_uuid()"))
+  code           String   @unique // FIRST_ACTIVITY, TEN_HOURS, ...
+  nameAr         String
+  nameFr         String
+  nameEn         String
+  descriptionAr  String?
+  descriptionFr  String?
+  descriptionEn  String?
+  thresholdHours Decimal? @db.Decimal(6, 2)
+  sortOrder      Int      @default(0)
+  active         Boolean  @default(true)
+
+  volunteers VolunteerAchievement[]
+}
+
+model VolunteerAchievement {
+  id                 String           @id @default(dbgenerated("gen_random_uuid()"))
+  volunteerProfileId String
+  volunteerProfile   VolunteerProfile @relation(fields: [volunteerProfileId], references: [id], onDelete: Cascade)
+  achievementId      String
+  achievement        Achievement      @relation(fields: [achievementId], references: [id])
+  unlockedAt         DateTime         @default(now())
+
+  @@unique([volunteerProfileId, achievementId])
+}
+
+model VolunteerCard {
+  id                 String                      @id @default(dbgenerated("gen_random_uuid()"))
+  cardNumber         String                      @unique // BLD-CARD-XXXXXXXX
+  volunteerProfileId String                      @unique
+  volunteerProfile   VolunteerProfile            @relation(fields: [volunteerProfileId], references: [id], onDelete: Cascade)
+  photoDocumentId    String?
+  verificationStatus VolunteerVerificationStatus @default(UNVERIFIED)
+  status             CardStatus                  @default(ACTIVE)
+  issuedAt           DateTime?
+  expiresAt          DateTime?
+  qrToken            String                      @unique // minimal public reveal on /verify/volunteer/[token]
+  createdAt          DateTime                    @default(now())
+  updatedAt          DateTime                    @updatedAt
+}
+
+// ─────────────────────────────────────────────────────────────
+// ORGANIZATIONS (TENANTS)
+// ─────────────────────────────────────────────────────────────
+
+model Organization {
+  id                 String             @id @default(dbgenerated("gen_random_uuid()"))
+  name               String
+  legalName          String?
+  slug               String             @unique
+  description        String?
+  logo               String?
+  coverImage         String?
+  organizationType   OrganizationType
+  website            String?
+  officialEmail      String?
+  phone              String?
+  countryId          String?
+  country            Country?           @relation(fields: [countryId], references: [id])
+  wilayaId           String?
+  wilaya             Wilaya?            @relation(fields: [wilayaId], references: [id])
+  cityId             String?
+  city               City?              @relation(fields: [cityId], references: [id])
+  address            String?
+  verificationStatus VerificationStatus @default(PENDING)
+  trustLevel         TrustLevel         @default(LEVEL_0_UNVERIFIED)
+  status             OrganizationStatus @default(PENDING_VERIFICATION)
+  verifiedAt         DateTime?
+  suspendedAt        DateTime?
+  suspendReason      String?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  deletedAt          DateTime?
+
+  members               OrganizationMember[]
+  invitations           OrganizationInvitation[]
+  verifications         OrganizationVerification[]
+  opportunities         Opportunity[]
+  activities            VolunteerActivity[]
+  hours                 VolunteerHour[]
+  certificates          VolunteerCertificate[]
+  campaigns             Campaign[]
+  verifiedSkills        VolunteerSkill[]
+  documents             Document[]
+  verificationDocuments VerificationDocument[]
+  subscription          Subscription?
+  invoices              Invoice[]
+  payments              Payment[]
+  auditLogs             AuditLog[]
+  analyticsEvents       AnalyticsEvent[]
+  // Partnerships & CSR ecosystem (P33): Organization is the single identity
+  // anchor for economic institutions (profile + derived sponsor bridge).
+  economicProfile       EconomicInstitutionProfile?
+  sponsor               Sponsor?
+  supportOffers         SupportOffer[]
+  partnerMatches        PartnerMatch[]
+  initiatedRequests     PartnershipRequest[]        @relation("RequesterOrg")
+  receivedRequests      PartnershipRequest[]        @relation("ReceiverOrg")
+  partnershipsYouth     Partnership[]               @relation("PartnershipYouthOrg")
+  partnershipsEconomic  Partnership[]               @relation("PartnershipEconomicOrg")
+  impactReports         ImpactReport[]
+
+  @@index([verificationStatus])
+  @@index([status])
+  @@index([wilayaId])
+  @@index([organizationType])
+  @@index([createdAt])
+}
+
+model OrganizationMember {
+  id             String          @id @default(dbgenerated("gen_random_uuid()"))
+  organizationId String
+  organization   Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role           OrgMemberRole
+  status         OrgMemberStatus @default(ACTIVE)
+  title          String?
+  joinedAt       DateTime?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@unique([organizationId, userId])
+  @@index([userId])
+}
+
+model OrganizationInvitation {
+  id             String           @id @default(dbgenerated("gen_random_uuid()"))
+  organizationId String
+  organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  email          String
+  role           OrgMemberRole
+  tokenHash      String           @unique
+  status         InvitationStatus @default(PENDING)
+  invitedById    String
+  invitedBy      User             @relation("InvitationActor", fields: [invitedById], references: [id])
+  expiresAt      DateTime
+  acceptedAt     DateTime?
+  createdAt      DateTime         @default(now())
+
+  @@index([organizationId, status])
+  @@index([email])
+}
+
+model OrganizationVerification {
+  id             String             @id @default(dbgenerated("gen_random_uuid()"))
+  organizationId String
+  organization   Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  level          TrustLevel
+  status         VerificationStatus @default(PENDING)
+  officerId      String?
+  submittedAt    DateTime           @default(now())
+  reviewedAt     DateTime?
+  notes          String? // officer notes
+  rejectReason   String?
+  expiresAt      DateTime? // verification expiry → EXPIRED status via cron
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  documents VerificationDocument[]
+
+  // Completed rows (VERIFIED/REJECTED) are append-only: never updated by application code.
+  @@index([organizationId, status])
+  @@index([status, level])
+  @@index([officerId])
+}
+
+model VerificationDocument {
+  id             String                    @id @default(dbgenerated("gen_random_uuid()"))
+  verificationId String?
+  verification   OrganizationVerification? @relation(fields: [verificationId], references: [id], onDelete: Cascade)
+  organizationId String
+  organization   Organization              @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  documentId     String
+  document       Document                  @relation(fields: [documentId], references: [id])
+  label          String
+  uploadedById   String
+  status         VerificationStatus        @default(PENDING)
+  createdAt      DateTime                  @default(now())
+
+  @@index([verificationId])
+  @@index([organizationId])
+}
+
+// ─────────────────────────────────────────────────────────────
+// OPPORTUNITIES
+// ─────────────────────────────────────────────────────────────
+
+model OpportunityCategory {
+  id        String  @id @default(dbgenerated("gen_random_uuid()"))
+  slug      String  @unique
+  nameAr    String
+  nameFr    String
+  nameEn    String
+  icon      String?
+  sortOrder Int     @default(0)
+  active    Boolean @default(true)
+
+  opportunities Opportunity[]
+}
+
+model OpportunitySource {
+  id             String     @id @default(dbgenerated("gen_random_uuid()"))
+  name           String
+  sourceType     SourceType @default(EXTERNAL)
+  url            String?
+  domain         String? // used by the risk engine
+  organizationId String? // the *external* organization behind the source (not necessarily a BLADNA tenant)
+  official       Boolean    @default(false)
+  verified       Boolean    @default(false)
+  verifiedById   String?
+  lastCheckedAt  DateTime?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  opportunities       Opportunity[]
+  internationalOffers InternationalOpportunity[]
+
+  @@index([sourceType])
+  @@index([domain])
+}
+
+model Opportunity {
+  id                  String               @id @default(dbgenerated("gen_random_uuid()"))
+  slug                String               @unique
+  organizationId      String
+  organization        Organization         @relation(fields: [organizationId], references: [id])
+  campaignId          String?
+  campaign            Campaign?            @relation(fields: [campaignId], references: [id])
+  titleAr             String
+  titleFr             String
+  titleEn             String
+  descriptionAr       String
+  descriptionFr       String
+  descriptionEn       String
+  // The problem this initiative addresses and its objective (spec §4) —
+  // localized like every other narrative field; description stays the "about".
+  problemAr           String?
+  problemFr           String?
+  problemEn           String?
+  objectiveAr         String?
+  objectiveFr         String?
+  objectiveEn         String?
+  type                OpportunityType
+  categoryId          String?
+  category            OpportunityCategory? @relation(fields: [categoryId], references: [id])
+  locationType        LocationType
+  countryId           String?
+  country             Country?             @relation(fields: [countryId], references: [id])
+  wilayaId            String?
+  wilaya              Wilaya?              @relation(fields: [wilayaId], references: [id])
+  cityId              String?
+  city                City?                @relation(fields: [cityId], references: [id])
+  address             String?
+  latitude            Float?
+  longitude           Float?
+  startDate           DateTime?
+  endDate             DateTime?
+  applicationDeadline DateTime?
+  capacity            Int?
+  minimumAge          Int?
+  maximumAge          Int?
+  estimatedHours      Decimal?             @db.Decimal(6, 2)
+  status              OpportunityStatus    @default(DRAFT)
+  verificationStatus  VerificationStatus   @default(PENDING)
+  verifiedAt          DateTime?
+  sourceId            String?
+  source              OpportunitySource?   @relation(fields: [sourceId], references: [id])
+  sourceUrl           String?
+  publishedAt         DateTime?
+  viewCount           Int                  @default(0)
+  applicationCount    Int                  @default(0)
+  // Accepted volunteers (spec §9/§11 «needs volunteers» + §12 joined counts):
+  // maintained only by the org application-decision paths; backfilled once in
+  // migration 0010. Lets discover honestly filter capacity > acceptedCount.
+  acceptedCount       Int                  @default(0)
+  // Denormalized "still has open volunteer spots" = capacity IS NULL OR
+  // acceptedCount < capacity. Recomputed on capacity edits and on ACCEPTED
+  // decisions, backfilled in migration 0010 (Prisma cannot compare two
+  // columns inside a where-clause, so the honest open-spots filter needs it).
+  hasOpenSpots        Boolean              @default(true)
+  // Presentation + contact (spec §4): a cover image URL and initiative-level
+  // contact details; when absent, the UI falls back to the organizer's own.
+  coverImage          String?
+  contactName         String?
+  contactPhone        String?
+  contactEmail        String?
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  deletedAt           DateTime?
+
+  skills              OpportunitySkill[]
+  languages           OpportunityLanguage[]
+  benefits            OpportunityBenefit[]
+  requirements        OpportunityRequirement[]
+  questions           OpportunityQuestion[]
+  applications        OpportunityApplication[]
+  attendance          Attendance[]
+  sessions            AttendanceSession[]
+  saved               SavedOpportunity[]
+  activities          VolunteerActivity[]
+  certificates        VolunteerCertificate[]
+  supportNeeds        SupportNeed[]
+  impactMetrics       ImpactMetric[]
+  reviews             OpportunityReview[]
+  focusAreas          OpportunityFocusArea[]
+  partnerMatches      PartnerMatch[]
+  partnershipRequests PartnershipRequest[]
+  partnerships        Partnership[]
+
+  // full-text search (maintained by the search service)
+  searchVector String? @db.Text
+
+  @@index([status, publishedAt(sort: Desc)])
+  @@index([verificationStatus])
+  @@index([applicationDeadline])
+  @@index([countryId])
+  @@index([wilayaId])
+  @@index([cityId])
+  @@index([organizationId])
+  @@index([categoryId])
+  @@index([campaignId])
+  @@index([type])
+  @@index([locationType])
+}
+
+// Participant reviews & ratings (P24): a 1–5 rating plus an optional written
+// body, one row per author per initiative (compound unique). Eligibility
+// (ACCEPTED application OR verified hours on this initiative) is enforced at
+// the route — either path qualifies, so no single FK captures it — and
+// `source` records which path qualified the author at review time. Rating is
+// bounded by a CHECK constraint (migration 0011; Prisma does not model checks).
+model OpportunityReview {
+  id            String       @id @default(dbgenerated("gen_random_uuid()"))
+  opportunityId String
+  opportunity   Opportunity  @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  authorId      String
+  author        User         @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  rating        Int
+  body          String?
+  source        ReviewSource
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@unique([opportunityId, authorId])
+  @@index([opportunityId, createdAt])
+}
+
+model OpportunitySkill {
+  id            String      @id @default(dbgenerated("gen_random_uuid()"))
+  opportunityId String
+  opportunity   Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  skillId       String
+  skill         Skill       @relation(fields: [skillId], references: [id])
+  required      Boolean     @default(false)
+
+  @@unique([opportunityId, skillId])
+  @@index([skillId])
+}
+
+model OpportunityLanguage {
+  id            String      @id @default(dbgenerated("gen_random_uuid()"))
+  opportunityId String
+  opportunity   Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  languageId    String
+  language      Language    @relation(fields: [languageId], references: [id])
+  required      Boolean     @default(false)
+
+  @@unique([opportunityId, languageId])
+  @@index([languageId])
+}
+
+model OpportunityBenefit {
+  id            String       @id @default(dbgenerated("gen_random_uuid()"))
+  opportunityId String
+  opportunity   Opportunity  @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  benefitType   BenefitType
+  value         BenefitValue @default(UNKNOWN) // never assume a benefit exists
+  note          String?
+
+  @@unique([opportunityId, benefitType])
+}
+
+model OpportunityRequirement {
+  id            String          @id @default(dbgenerated("gen_random_uuid()"))
+  opportunityId String
+  opportunity   Opportunity     @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  type          RequirementType
+  labelAr       String
+  labelFr       String
+  labelEn       String
+  description   String?
+  required      Boolean         @default(true)
+  sortOrder     Int             @default(0)
+}
+
+model OpportunityQuestion {
+  id            String       @id @default(dbgenerated("gen_random_uuid()"))
+  opportunityId String
+  opportunity   Opportunity  @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  promptAr      String
+  promptFr      String
+  promptEn      String
+  type          QuestionType @default(TEXT)
+  required      Boolean      @default(false)
+  options       Json? // for CHOICE: [{value, labelAr, labelFr, labelEn}]
+  sortOrder     Int          @default(0)
+
+  answers ApplicationAnswer[]
+}
+
+model SavedOpportunity {
+  id                 String           @id @default(dbgenerated("gen_random_uuid()"))
+  volunteerProfileId String
+  volunteerProfile   VolunteerProfile @relation(fields: [volunteerProfileId], references: [id], onDelete: Cascade)
+  opportunityId      String
+  opportunity        Opportunity      @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  createdAt          DateTime         @default(now())
+
+  @@unique([volunteerProfileId, opportunityId])
+}
+
+model OpportunityApplication {
+  id                 String              @id @default(dbgenerated("gen_random_uuid()"))
+  opportunityId      String
+  opportunity        Opportunity         @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  volunteerProfileId String
+  volunteerProfile   VolunteerProfile    @relation(fields: [volunteerProfileId], references: [id], onDelete: Cascade)
+  status             ApplicationStatus   @default(SUBMITTED)
+  motivation         String?
+  availability       String?
+  answers            ApplicationAnswer[]
+  submittedAt        DateTime            @default(now())
+  reviewedAt         DateTime?
+  reviewedById       String?
+  decisionNote       String?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+
+  // duplicate active applications blocked by partial unique index (migration 0002)
+  @@index([opportunityId, status])
+  @@index([volunteerProfileId, status])
+  @@index([submittedAt])
+}
+
+model ApplicationAnswer {
+  id            String                 @id @default(dbgenerated("gen_random_uuid()"))
+  applicationId String
+  application   OpportunityApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  questionId    String
+  question      OpportunityQuestion    @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  answer        String
+
+  @@unique([applicationId, questionId])
+}
+
+// ─────────────────────────────────────────────────────────────
+// ATTENDANCE & HOURS
+// ─────────────────────────────────────────────────────────────
+
+model AttendanceSession {
+  id            String      @id @default(dbgenerated("gen_random_uuid()"))
+  opportunityId String
+  opportunity   Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  name          String
+  tokenHash     String      @unique // sha256 of the QR token — raw token only lives in the QR image
+  startsAt      DateTime
+  expiresAt     DateTime // QR tokens must expire
+  createdById   String
+  revokedAt     DateTime?
+  createdAt     DateTime    @default(now())
+
+  attendance Attendance[]
+
+  @@index([opportunityId, expiresAt])
+}
+
+model Attendance {
+  id                 String             @id @default(dbgenerated("gen_random_uuid()"))
+  opportunityId      String
+  opportunity        Opportunity        @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  volunteerProfileId String
+  volunteerProfile   VolunteerProfile   @relation(fields: [volunteerProfileId], references: [id], onDelete: Cascade)
+  sessionId          String?
+  session            AttendanceSession? @relation(fields: [sessionId], references: [id])
+  activityId         String?
+  activity           VolunteerActivity? @relation(fields: [activityId], references: [id])
+  date               DateTime           @db.Timestamp(3)
+  checkInAt          DateTime?
+  checkOutAt         DateTime?
+  hours              Decimal?           @db.Decimal(6, 2)
+  method             AttendanceMethod   @default(QR)
+  verifiedById       String?
+  status             AttendanceStatus   @default(PENDING_CONFIRMATION)
+  rejectReason       String?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  hour VolunteerHour?
+
+  @@unique([sessionId, volunteerProfileId]) // duplicate check-in per session
+  @@index([volunteerProfileId, date])
+  @@index([opportunityId, date])
+  @@index([status])
+}
+
+model VolunteerCertificate {
+  id                 String             @id @default(dbgenerated("gen_random_uuid()"))
+  volunteerProfileId String
+  volunteerProfile   VolunteerProfile   @relation(fields: [volunteerProfileId], references: [id], onDelete: Cascade)
+  organizationId     String
+  organization       Organization       @relation(fields: [organizationId], references: [id])
+  activityId         String?
+  activity           VolunteerActivity? @relation(fields: [activityId], references: [id])
+  opportunityId      String?
+  opportunity        Opportunity?       @relation(fields: [opportunityId], references: [id])
+  title              String
+  description        String?
+  hours              Decimal            @db.Decimal(6, 2)
+  issuedAt           DateTime           @default(now())
+  certificateNumber  String             @unique // BLD-CERT-XXXXXXXXXX (deterministic per issue)
+  verificationToken  String             @unique // non-guessable public secret
+  status             CertificateStatus  @default(VALID)
+  templateId         String?
+  issuedById         String
+  revokedAt          DateTime?
+  revokedById        String?
+  revokeReason       String?
+  expiresAt          DateTime?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  @@index([volunteerProfileId, status])
+  @@index([organizationId, status])
+  @@index([issuedAt])
+}
+
+// ─────────────────────────────────────────────────────────────
+// CAMPAIGNS & IMPACT
+// ─────────────────────────────────────────────────────────────
+
+model Campaign {
+  id                String         @id @default(dbgenerated("gen_random_uuid()"))
+  organizationId    String
+  organization      Organization   @relation(fields: [organizationId], references: [id])
+  name              String
+  slug              String         @unique
+  description       String?
+  goal              String?
+  startDate         DateTime
+  endDate           DateTime
+  status            CampaignStatus @default(DRAFT)
+  volunteerTarget   Int?
+  hourTarget        Decimal?       @db.Decimal(8, 2)
+  beneficiaryTarget Int?
+  budget            Decimal?       @db.Decimal(14, 2)
+  currency          String         @default("DZD")
+  coverImage        String?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  opportunities Opportunity[]
+  participants  CampaignParticipant[]
+  contributions CampaignContribution[]
+  metrics       ImpactMetric[]
+  sponsorships  Sponsorship[]
+  activities    VolunteerActivity[]
+  partnerships  Partnership[]
+
+  @@index([organizationId, status])
+  @@index([status, endDate])
+}
+
+model CampaignParticipant {
+  id                 String              @id @default(dbgenerated("gen_random_uuid()"))
+  campaignId         String
+  campaign           Campaign            @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  volunteerProfileId String
+  volunteerProfile   VolunteerProfile    @relation(fields: [volunteerProfileId], references: [id], onDelete: Cascade)
+  opportunityId      String?
+  status             ParticipationStatus @default(REGISTERED)
+  hours              Decimal             @default(0) @db.Decimal(6, 2)
+  participationDate  DateTime            @db.Timestamp(3)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+
+  @@index([campaignId, status])
+  @@index([volunteerProfileId])
+}
+
+// A recorded bank-transfer contribution to a campaign (spec §33): the money
+// moves bank → organization, the platform only records and tracks confirmation.
+// Terminal states (CONFIRMED/REJECTED) are never re-decided; no refund flow here.
+model CampaignContribution {
+  id          String             @id @default(dbgenerated("gen_random_uuid()"))
+  campaignId  String
+  campaign    Campaign           @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  amount      Decimal            @db.Decimal(14, 2)
+  currency    String             @default("DZD")
+  status      ContributionStatus @default(PENDING)
+  // Bank-transfer receipt reference — one per campaign when present (NULLs repeat freely).
+  reference   String?
+  note        String?
+  // Decision bookkeeping (organization side).
+  reason      String?
+  decidedById String?
+  decidedAt   DateTime?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  @@unique([campaignId, reference])
+  @@index([campaignId, status])
+  @@index([userId])
+}
+
+// ─────────────────────────────────────────────────────────────
+// INITIATIVE SUPPORT NEEDS & OFFERS (spec §5/§13)
+// ─────────────────────────────────────────────────────────────
+
+enum SupportNeedKind {
+  FINANCIAL
+  EQUIPMENT
+  MATERIAL
+  SERVICE
+}
+
+enum SupportOfferStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  CANCELLED
+}
+
+// What an initiative declares it needs (spec §5). Volunteers are already
+// modeled by capacity + applications; these rows cover financial / equipment /
+// material / service needs. Progress is honest: `fulfilled` is maintained by
+// the owner, and FINANCIAL progress is derived from the linked campaign's
+// confirmed contributions (never duplicated here).
+model SupportNeed {
+  id            String          @id @default(dbgenerated("gen_random_uuid()"))
+  opportunityId String
+  opportunity   Opportunity     @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  kind          SupportNeedKind
+  labelAr       String
+  labelFr       String
+  labelEn       String
+  description   String?
+  // Quantity needs (equipment/material/service): target and owner-maintained progress.
+  quantity      Int?
+  fulfilled     Int             @default(0)
+  // FINANCIAL needs: target amount; money moves bank → organization via the
+  // initiative's linked campaign (no payment gateway anywhere).
+  targetAmount  Decimal?        @db.Decimal(14, 2)
+  currency      String          @default("DZD")
+  sortOrder     Int             @default(0)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  offers              SupportOffer[]
+  partnershipRequests PartnershipRequest[]
+
+  @@index([opportunityId, kind])
+}
+
+// A traceable offer of support toward one need (spec §13 — "all support must
+// be traceable"). PENDING until the initiative owner accepts or rejects it
+// (reason required on REJECT); the offerer may cancel while still PENDING.
+model SupportOffer {
+  id             String             @id @default(dbgenerated("gen_random_uuid()"))
+  supportNeedId  String
+  supportNeed    SupportNeed        @relation(fields: [supportNeedId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // P33: an offer may be made on behalf of an institution (company/association).
+  // userId stays required — the authenticated actor is always the author and
+  // org membership is re-resolved server-side (client org id = hint, not trust).
+  organizationId String?
+  organization   Organization?      @relation(fields: [organizationId], references: [id])
+  quantity       Int?
+  // FINANCIAL offers: the pledged amount (bank → organization, outside the
+  // platform — we only record the pledge, exactly like campaign contributions).
+  amount         Decimal?           @db.Decimal(14, 2)
+  currency       String             @default("DZD")
+  description    String // what exactly is offered / the service described
+  contactNote    String? // delivery point, availability, phone, etc.
+  status         SupportOfferStatus @default(PENDING)
+  reason         String? // reject reason (required on REJECT)
+  decidedById    String?
+  decidedAt      DateTime?
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  @@index([supportNeedId, status])
+  @@index([userId])
+}
+
+model ImpactMetric {
+  id            String       @id @default(dbgenerated("gen_random_uuid()"))
+  campaignId    String?
+  campaign      Campaign?    @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  csrProgramId  String?
+  csrProgram    CSRProgram?  @relation(fields: [csrProgramId], references: [id], onDelete: Cascade)
+  // Initiative-level impact (spec §14): need → support → execution → result.
+  opportunityId String?
+  opportunity   Opportunity? @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  metricType    MetricType
+  name          String
+  target        Decimal?     @db.Decimal(14, 2)
+  actual        Decimal      @default(0) @db.Decimal(14, 2)
+  unit          String
+  source        String // data source note — verified=false without a real source
+  verified      Boolean      @default(false)
+  verifiedById  String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  evidence ImpactEvidence[]
+
+  @@index([campaignId])
+  @@index([csrProgramId, metricType])
+  @@index([opportunityId])
+}
+
+// ─────────────────────────────────────────────────────────────
+// SPONSORS / CSR
+// ─────────────────────────────────────────────────────────────
+
+model Sponsor {
+  id                 String             @id @default(dbgenerated("gen_random_uuid()"))
+  legalName          String
+  commercialName     String
+  slug               String             @unique
+  logo               String?
+  description        String?
+  website            String?
+  industry           String?
+  contactEmail       String?
+  contactPhone       String?
+  // Compatibility bridge to the tenant system (P33): when set, Organization is
+  // the source of truth for identity fields; legacy sponsors keep NULL here.
+  organizationId     String?            @unique
+  organization       Organization?      @relation(fields: [organizationId], references: [id])
+  verificationStatus VerificationStatus @default(PENDING)
+  status             SponsorStatus      @default(PENDING)
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  deletedAt          DateTime?
+
+  members      SponsorMember[]
+  programs     CSRProgram[]
+  sponsorships Sponsorship[]
+
+  @@index([status])
+}
+
+model SponsorMember {
+  id        String     @id @default(dbgenerated("gen_random_uuid()"))
+  sponsorId String
+  sponsor   Sponsor    @relation(fields: [sponsorId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      SystemRole @default(SPONSOR_MEMBER)
+  createdAt DateTime   @default(now())
+
+  @@unique([sponsorId, userId])
+  @@index([userId])
+}
+
+model CSRProgram {
+  id                String        @id @default(dbgenerated("gen_random_uuid()"))
+  sponsorId         String
+  sponsor           Sponsor       @relation(fields: [sponsorId], references: [id], onDelete: Cascade)
+  title             String
+  description       String?
+  budget            Decimal       @db.Decimal(14, 2)
+  currency          String        @default("DZD")
+  startDate         DateTime
+  endDate           DateTime
+  status            ProgramStatus @default(DRAFT)
+  volunteerTarget   Int?
+  hourTarget        Decimal?      @db.Decimal(8, 2)
+  beneficiaryTarget Int?
+  impactTarget      String?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  metrics             ImpactMetric[]
+  sponsorships        Sponsorship[]
+  partnerships        Partnership[]
+  fundingCommitments  FundingCommitment[]
+  partnershipRequests PartnershipRequest[]
+
+  @@index([sponsorId, status])
+}
+
+model Sponsorship {
+  id           String            @id @default(dbgenerated("gen_random_uuid()"))
+  sponsorId    String
+  sponsor      Sponsor           @relation(fields: [sponsorId], references: [id], onDelete: Cascade)
+  campaignId   String?
+  campaign     Campaign?         @relation(fields: [campaignId], references: [id])
+  csrProgramId String?
+  csrProgram   CSRProgram?       @relation(fields: [csrProgramId], references: [id])
+  amount       Decimal           @db.Decimal(14, 2)
+  currency     String            @default("DZD")
+  kind         SponsorshipKind   @default(CASH)
+  // What is contributed when kind = IN_KIND (transport, meals, gear…); required for IN_KIND.
+  description  String?
+  status       SponsorshipStatus @default(PROPOSED)
+  startDate    DateTime
+  endDate      DateTime?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  // Sponsors fund programs; they can never edit volunteer verification records (enforced in service layer).
+
+  fundingCommitments FundingCommitment[]
+
+  @@index([sponsorId, status])
+  @@index([campaignId])
+}
+
+// ─────────────────────────────────────────────────────────────
+// PARTNERSHIPS & CSR ECOSYSTEM (P33)
+// Youth organizations ↔ economic institutions, end to end:
+//   profile → matching → request → proposal → partnership → agreement →
+//   funding / in-kind → execution (existing systems) → evidence →
+//   verification → impact → CSR report.
+// Design doc: docs/PARTNERSHIPS-CSR-DESIGN.md. Organization is the single
+// identity anchor; Sponsor survives only as a 1:1 compatibility bridge.
+// Convention: "…ById" actor columns are plain strings without FK (resolved
+// server-side) — mirroring Attendance.verifiedById / reviewedById patterns.
+// ─────────────────────────────────────────────────────────────
+
+enum EconomicCompanySize {
+  MICRO
+  SMALL
+  MEDIUM
+  LARGE
+  ENTERPRISE
+}
+
+enum EconomicSector {
+  AGRICULTURE
+  INDUSTRY
+  CONSTRUCTION
+  ENERGY
+  TELECOM_IT
+  FINANCE_INSURANCE
+  TRANSPORT_LOGISTICS
+  COMMERCE
+  TOURISM
+  HEALTH
+  EDUCATION_TRAINING
+  MEDIA_CULTURE
+  MINING
+  WATER_SANITATION
+  OTHER
+}
+
+enum BeneficiaryGroup {
+  WOMEN
+  YOUTH
+  CHILDREN
+  RURAL
+  DISABILITY
+  ELDERLY
+  OTHER
+}
+
+enum PartnershipRequestStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  REQUEST_INFO
+  SHORTLISTED
+  NEGOTIATION
+  APPROVED
+  REJECTED
+  CANCELLED
+  EXPIRED
+}
+
+enum PartnershipProposalStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  ACCEPTED
+  REJECTED
+  WITHDRAWN
+  SUPERSEDED
+}
+
+enum PartnershipStatus {
+  PROPOSED
+  ACTIVE
+  PAUSED
+  COMPLETED
+  CANCELLED
+  TERMINATED
+}
+
+enum PartnershipType {
+  SPONSORSHIP
+  SERVICE
+  IN_KIND
+  COOPERATION
+  PRO_BONO
+}
+
+enum AgreementStatus {
+  DRAFT
+  PENDING_SIGNATURE
+  ACTIVE
+  EXPIRED
+  TERMINATED
+}
+
+enum AgreementType {
+  FRAMEWORK
+  COOPERATION
+  SPONSORSHIP
+  SERVICE_PROVISION
+  OTHER
+}
+
+enum ObligationParty {
+  INITIATIVE_ORGANIZATION
+  ECONOMIC_ORGANIZATION
+}
+
+enum ObligationStatus {
+  PENDING
+  IN_PROGRESS
+  FULFILLED
+  WAIVED
+  BREACHED
+}
+
+enum FundingCommitmentStatus {
+  PENDING
+  COMMITTED
+  CANCELLED
+  TERMINATED
+}
+
+enum FundingInstallmentStatus {
+  SCHEDULED
+  PAID
+  CANCELLED
+}
+
+enum DisbursementStatus {
+  SCHEDULED
+  EXECUTED
+  VERIFIED
+  REJECTED
+}
+
+enum InKindContributionKind {
+  EQUIPMENT
+  MATERIAL
+  TRANSPORTATION
+  FOOD
+  TRAINING
+  SERVICES
+  TECHNOLOGY
+  LOGISTICS
+  OTHER
+}
+
+enum InKindStatus {
+  PLANNED
+  DELIVERED
+  RECEIVED
+  VERIFIED
+  REJECTED
+}
+
+enum ImpactEvidenceType {
+  PHOTO
+  DOCUMENT
+  ATTENDANCE
+  CERTIFICATE
+  RECEIPT
+  INVOICE
+  REPORT
+  VIDEO
+  OTHER
+}
+
+enum EvidenceStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum ImpactReportStatus {
+  DRAFT
+  GENERATED
+  PUBLISHED
+  ARCHIVED
+}
+
+enum PartnershipInteractionType {
+  MEETING
+  CALL
+  EMAIL
+  MESSAGE
+  EVENT
+  SITE_VISIT
+  OTHER
+}
+
+enum PartnershipFollowUpStatus {
+  OPEN
+  DONE
+  CANCELLED
+}
+
+// ── Economic institution profile (identity lives on Organization) ──
+
+// Economic participation profile of a tenant: the company's facts and CSR
+// preferences. One per Organization — name/logo/contacts are never duplicated
+// here (Organization remains the identity source of truth).
+model EconomicInstitutionProfile {
+  id             String       @id @default(dbgenerated("gen_random_uuid()"))
+  organizationId String       @unique
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  sector                     EconomicSector?
+  subSector                  String?
+  companySize                EconomicCompanySize?
+  nationalScope              Boolean              @default(true)
+  csrEnabled                 Boolean              @default(false)
+  esgEnabled                 Boolean              @default(false)
+  csrContactName             String?
+  csrContactEmail            String?
+  csrContactPhone            String?
+  // Money: Decimal only, never Float (house rule).
+  annualCSRBudget            Decimal?             @db.Decimal(14, 2)
+  minProjectBudget           Decimal?             @db.Decimal(14, 2)
+  maxProjectBudget           Decimal?             @db.Decimal(14, 2)
+  currency                   String               @default("DZD")
+  // Preference sets consumed by the deterministic matching engine.
+  preferredSupportTypes      SupportNeedKind[]    @default([])
+  preferredBeneficiaryGroups BeneficiaryGroup[]   @default([])
+  createdAt                  DateTime             @default(now())
+  updatedAt                  DateTime             @updatedAt
+
+  focusAreas       EconomicProfileFocusArea[]
+  preferredWilayas EconomicProfileWilaya[]
+}
+
+// Localized reference set (seeded, 16 rows): the shared vocabulary that lets
+// the engine compare "what the firm funds" with "what the initiative touches".
+model CSRFocusArea {
+  id        String  @id @default(dbgenerated("gen_random_uuid()"))
+  code      String  @unique // EDUCATION, ENVIRONMENT, ...
+  nameAr    String
+  nameFr    String
+  nameEn    String
+  active    Boolean @default(true)
+  sortOrder Int     @default(0)
+
+  economicProfiles EconomicProfileFocusArea[]
+  opportunities    OpportunityFocusArea[]
+}
+
+model EconomicProfileFocusArea {
+  id          String                     @id @default(dbgenerated("gen_random_uuid()"))
+  profileId   String
+  profile     EconomicInstitutionProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  focusAreaId String
+  focusArea   CSRFocusArea               @relation(fields: [focusAreaId], references: [id])
+  priority    Int                        @default(0) // higher = the firm cares more
+
+  @@unique([profileId, focusAreaId])
+  @@index([focusAreaId])
+}
+
+model EconomicProfileWilaya {
+  id        String                     @id @default(dbgenerated("gen_random_uuid()"))
+  profileId String
+  profile   EconomicInstitutionProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  wilayaId  String
+  wilaya    Wilaya                     @relation(fields: [wilayaId], references: [id])
+
+  @@unique([profileId, wilayaId])
+  @@index([wilayaId])
+}
+
+model OpportunityFocusArea {
+  id            String       @id @default(dbgenerated("gen_random_uuid()"))
+  opportunityId String
+  opportunity   Opportunity  @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  focusAreaId   String
+  focusArea     CSRFocusArea @relation(fields: [focusAreaId], references: [id])
+
+  @@unique([opportunityId, focusAreaId])
+  @@index([focusAreaId])
+}
+
+// ── Deterministic matching ──
+
+// Materialized scorecard (rules-v1): one row per (initiative, economic
+// organization) with a fully explainable breakdown — never a black box.
+// Recomputed on demand; engineVersion tracks scoring changes, exactly like
+// RiskAssessment.engineVersion.
+model PartnerMatch {
+  id                     String       @id @default(dbgenerated("gen_random_uuid()"))
+  opportunityId          String
+  opportunity            Opportunity  @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  economicOrganizationId String
+  economicOrganization   Organization @relation(fields: [economicOrganizationId], references: [id], onDelete: Cascade)
+  score                  Int // 0-100
+  breakdown              Json // [{code, weight, points, detail}] — human-readable reasons
+  engineVersion          String       @default("rules-v1")
+  computedAt             DateTime     @default(now())
+  createdAt              DateTime     @default(now())
+  updatedAt              DateTime     @updatedAt
+
+  @@unique([opportunityId, economicOrganizationId])
+  @@index([economicOrganizationId, score(sort: Desc)])
+  @@index([opportunityId, score(sort: Desc)])
+}
+
+// ── Partnership lifecycle ──
+
+// Either side may open a conversation. Terminal decisions
+// (APPROVED/REJECTED) are recorded once and never re-decided (house rule).
+model PartnershipRequest {
+  id                      String                   @id @default(dbgenerated("gen_random_uuid()"))
+  requesterOrganizationId String
+  requesterOrganization   Organization             @relation("RequesterOrg", fields: [requesterOrganizationId], references: [id])
+  receiverOrganizationId  String
+  receiverOrganization    Organization             @relation("ReceiverOrg", fields: [receiverOrganizationId], references: [id])
+  opportunityId           String?
+  opportunity             Opportunity?             @relation(fields: [opportunityId], references: [id], onDelete: SetNull)
+  supportNeedId           String?
+  supportNeed             SupportNeed?             @relation(fields: [supportNeedId], references: [id], onDelete: SetNull)
+  csrProgramId            String?
+  csrProgram              CSRProgram?              @relation(fields: [csrProgramId], references: [id], onDelete: SetNull)
+  requestedAmount         Decimal?                 @db.Decimal(14, 2)
+  currency                String                   @default("DZD")
+  message                 String
+  status                  PartnershipRequestStatus @default(DRAFT)
+  submittedAt             DateTime?
+  reviewedAt              DateTime?
+  reviewedById            String? // decision actor — plain id, resolved server-side
+  decisionNote            String?
+  expiresAt               DateTime? // EXPIRED via cron
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
+
+  proposals PartnershipProposal[]
+
+  @@index([receiverOrganizationId, status])
+  @@index([requesterOrganizationId, status])
+  @@index([opportunityId])
+  @@index([status, createdAt])
+}
+
+// Versioned: a counter-proposal or revision bumps `version`; superseded rows
+// are preserved, never rewritten (append-friendly history).
+model PartnershipProposal {
+  id                   String                    @id @default(dbgenerated("gen_random_uuid()"))
+  partnershipRequestId String
+  partnershipRequest   PartnershipRequest        @relation(fields: [partnershipRequestId], references: [id], onDelete: Cascade)
+  version              Int                       @default(1)
+  title                String
+  description          String?
+  requestedAmount      Decimal?                  @db.Decimal(14, 2)
+  currency             String                    @default("DZD")
+  supportType          SupportNeedKind? // primary ask: FINANCIAL | EQUIPMENT | MATERIAL | SERVICE
+  implementationPlan   String?
+  expectedOutcomes     String?
+  beneficiaryTarget    Int?
+  volunteerTarget      Int?
+  hourTarget           Decimal?                  @db.Decimal(8, 2)
+  startDate            DateTime?
+  endDate              DateTime?
+  status               PartnershipProposalStatus @default(DRAFT)
+  createdById          String? // plain id — AuditLog carries the actor
+  createdAt            DateTime                  @default(now())
+  updatedAt            DateTime                  @updatedAt
+
+  partnership Partnership?
+
+  @@unique([partnershipRequestId, version])
+  @@index([partnershipRequestId, status])
+}
+
+// The relationship itself: youth organization ↔ economic organization around
+// an initiative (optionally tied to a CSR program and/or a financial campaign).
+model Partnership {
+  id                     String               @id @default(dbgenerated("gen_random_uuid()"))
+  organizationId         String
+  organization           Organization         @relation("PartnershipYouthOrg", fields: [organizationId], references: [id])
+  economicOrganizationId String
+  economicOrganization   Organization         @relation("PartnershipEconomicOrg", fields: [economicOrganizationId], references: [id])
+  opportunityId          String?
+  opportunity            Opportunity?         @relation(fields: [opportunityId], references: [id], onDelete: SetNull)
+  campaignId             String?
+  campaign               Campaign?            @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  csrProgramId           String?
+  csrProgram             CSRProgram?          @relation(fields: [csrProgramId], references: [id], onDelete: SetNull)
+  proposalId             String?              @unique // provenance of the accepted proposal
+  proposal               PartnershipProposal? @relation(fields: [proposalId], references: [id])
+  partnershipType        PartnershipType      @default(COOPERATION)
+  status                 PartnershipStatus    @default(PROPOSED)
+  startDate              DateTime?
+  endDate                DateTime?
+  totalValue             Decimal?             @db.Decimal(14, 2)
+  currency               String               @default("DZD")
+  createdAt              DateTime             @default(now())
+  updatedAt              DateTime             @updatedAt
+
+  agreements   PartnershipAgreement[]
+  obligations  PartnershipObligation[]
+  commitments  FundingCommitment[]
+  inKind       InKindContribution[]
+  contacts     PartnershipContact[]
+  interactions PartnershipInteraction[]
+  followUps    PartnershipFollowUp[]
+  notes        PartnershipNote[]
+
+  // Service rule: at most one PROPOSED/ACTIVE partnership per
+  // (opportunity, economic organization) — enforced like duplicate
+  // applications (partial unique index), because completed partnerships may
+  // legitimately repeat over time.
+
+  @@index([organizationId, status])
+  @@index([economicOrganizationId, status])
+  @@index([opportunityId])
+  @@index([csrProgramId])
+  @@index([campaignId])
+}
+
+model PartnershipAgreement {
+  id              String          @id @default(dbgenerated("gen_random_uuid()"))
+  partnershipId   String
+  partnership     Partnership     @relation(fields: [partnershipId], references: [id], onDelete: Cascade)
+  agreementNumber String          @unique // AGR-2026-000001 — Counter("agreement_number")
+  title           String
+  agreementType   AgreementType   @default(FRAMEWORK)
+  documentId      String?
+  document        Document?       @relation(fields: [documentId], references: [id], onDelete: SetNull)
+  signedAt        DateTime?
+  signedById      String? // plain id of the signing member
+  startDate       DateTime?
+  endDate         DateTime?
+  totalValue      Decimal?        @db.Decimal(14, 2)
+  currency        String          @default("DZD")
+  status          AgreementStatus @default(DRAFT)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@index([partnershipId, status])
+}
+
+// What each party owes (spec §13): money, delivery, reports, visibility.
+model PartnershipObligation {
+  id                 String           @id @default(dbgenerated("gen_random_uuid()"))
+  partnershipId      String
+  partnership        Partnership      @relation(fields: [partnershipId], references: [id], onDelete: Cascade)
+  party              ObligationParty
+  title              String
+  description        String?
+  dueDate            DateTime?
+  value              Decimal?         @db.Decimal(14, 2)
+  currency           String           @default("DZD")
+  status             ObligationStatus @default(PENDING)
+  evidenceDocumentId String?
+  evidenceDocument   Document?        @relation(fields: [evidenceDocumentId], references: [id], onDelete: SetNull)
+  verifiedById       String? // plain id — verification officer
+  verifiedAt         DateTime?
+  completedAt        DateTime?
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  @@index([partnershipId, party, status])
+  @@index([dueDate])
+}
+
+// ── Funding lifecycle ──
+
+// commitment → installments → disbursement + receipt. Progress
+// (committed/spent/remaining) is always derived — never stored twice.
+model FundingCommitment {
+  id            String                  @id @default(dbgenerated("gen_random_uuid()"))
+  partnershipId String
+  partnership   Partnership             @relation(fields: [partnershipId], references: [id], onDelete: Cascade)
+  csrProgramId  String?
+  csrProgram    CSRProgram?             @relation(fields: [csrProgramId], references: [id], onDelete: SetNull)
+  sponsorshipId String? // legacy anchor when the commitment descends from a Sponsorship
+  sponsorship   Sponsorship?            @relation(fields: [sponsorshipId], references: [id], onDelete: SetNull)
+  amount        Decimal                 @db.Decimal(14, 2)
+  currency      String                  @default("DZD")
+  status        FundingCommitmentStatus @default(PENDING)
+  committedAt   DateTime?
+  notes         String?
+  createdAt     DateTime                @default(now())
+  updatedAt     DateTime                @updatedAt
+
+  installments  FundingInstallment[]
+  disbursements Disbursement[]
+
+  @@index([partnershipId, status])
+}
+
+model FundingInstallment {
+  id                 String                   @id @default(dbgenerated("gen_random_uuid()"))
+  commitmentId       String
+  commitment         FundingCommitment        @relation(fields: [commitmentId], references: [id], onDelete: Cascade)
+  number             Int // 1..n within a commitment
+  amount             Decimal                  @db.Decimal(14, 2) // > 0 via CHECK (migration SQL)
+  currency           String                   @default("DZD")
+  dueAt              DateTime?
+  status             FundingInstallmentStatus @default(SCHEDULED)
+  paidAt             DateTime?
+  reference          String?
+  evidenceDocumentId String?
+  evidenceDocument   Document?                @relation(fields: [evidenceDocumentId], references: [id], onDelete: SetNull)
+  createdAt          DateTime                 @default(now())
+  updatedAt          DateTime                 @updatedAt
+
+  disbursements Disbursement[]
+
+  @@unique([commitmentId, number])
+  @@index([status, dueAt])
+}
+
+model Disbursement {
+  id                 String              @id @default(dbgenerated("gen_random_uuid()"))
+  commitmentId       String
+  commitment         FundingCommitment   @relation(fields: [commitmentId], references: [id], onDelete: Cascade)
+  installmentId      String?
+  installment        FundingInstallment? @relation(fields: [installmentId], references: [id], onDelete: SetNull)
+  amount             Decimal             @db.Decimal(14, 2) // > 0 via CHECK
+  currency           String              @default("DZD")
+  reference          String?
+  executedAt         DateTime?
+  evidenceDocumentId String? // the receipt
+  evidenceDocument   Document?           @relation(fields: [evidenceDocumentId], references: [id], onDelete: SetNull)
+  status             DisbursementStatus  @default(SCHEDULED)
+  verifiedById       String? // plain id — verification officer
+  verifiedAt         DateTime?
+  rejectReason       String?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+
+  @@index([commitmentId, status])
+}
+
+// Real in-kind management (spec §15): what, how many, when, where, who
+// received it, on what evidence — replacing the legacy free-text description.
+model InKindContribution {
+  id                 String                 @id @default(dbgenerated("gen_random_uuid()"))
+  partnershipId      String
+  partnership        Partnership            @relation(fields: [partnershipId], references: [id], onDelete: Cascade)
+  kind               InKindContributionKind @default(OTHER)
+  item               String
+  quantity           Int
+  unit               String? // "unit", "kg", "hour"…
+  estimatedValue     Decimal?               @db.Decimal(14, 2)
+  marketValue        Decimal?               @db.Decimal(14, 2)
+  currency           String                 @default("DZD")
+  deliveryDate       DateTime?
+  deliveryLocation   String?
+  receivedById       String? // plain id
+  evidenceDocumentId String?
+  evidenceDocument   Document?              @relation(fields: [evidenceDocumentId], references: [id], onDelete: SetNull)
+  status             InKindStatus           @default(PLANNED)
+  verifiedById       String?
+  verifiedAt         DateTime?
+  rejectReason       String?
+  notes              String?
+  createdAt          DateTime               @default(now())
+  updatedAt          DateTime               @updatedAt
+
+  @@index([partnershipId, status])
+}
+
+// ── Evidence, reporting, CRM ──
+
+// Claimed impact → evidence → verification officer → VERIFIED/REJECTED
+// (terminal). Sponsors fund and upload; only officers verify (spec §18/§25).
+model ImpactEvidence {
+  id           String             @id @default(dbgenerated("gen_random_uuid()"))
+  metricId     String
+  metric       ImpactMetric       @relation(fields: [metricId], references: [id], onDelete: Cascade)
+  type         ImpactEvidenceType
+  documentId   String?
+  document     Document?          @relation(fields: [documentId], references: [id], onDelete: SetNull)
+  note         String?
+  uploadedById String // plain id
+  uploadedAt   DateTime           @default(now())
+  status       EvidenceStatus     @default(PENDING)
+  verifiedById String? // plain id — verification officer only
+  verifiedAt   DateTime?
+  rejectReason String?
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  @@index([metricId, status])
+  @@index([status, createdAt])
+}
+
+// Stored CSR report: aggregates over VERIFIED data only, frozen into `payload`
+// at generation time (the dashboard reads live, the report reads the freeze).
+// Anchored on the economic institution's Organization — no sponsor FK.
+model ImpactReport {
+  id             String             @id @default(dbgenerated("gen_random_uuid()"))
+  organizationId String
+  organization   Organization       @relation(fields: [organizationId], references: [id])
+  title          String?
+  periodStart    DateTime
+  periodEnd      DateTime
+  status         ImpactReportStatus @default(DRAFT)
+  payload        Json? // {budget, committed, disbursed, projects, beneficiaries, hours, wilayas, areas…}
+  generatedAt    DateTime?
+  generatedById  String? // plain id
+  publishedAt    DateTime?
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  @@index([organizationId, status])
+  @@index([organizationId, periodStart])
+}
+
+// Partnership CRM (spec §21): structured contacts and a touch timeline —
+// free chat stays in Conversation; this records the business relationship.
+model PartnershipContact {
+  id            String      @id @default(dbgenerated("gen_random_uuid()"))
+  partnershipId String
+  partnership   Partnership @relation(fields: [partnershipId], references: [id], onDelete: Cascade)
+  name          String
+  role          String?
+  email         String?
+  phone         String?
+  isPrimary     Boolean     @default(false)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@index([partnershipId])
+}
+
+model PartnershipInteraction {
+  id            String                     @id @default(dbgenerated("gen_random_uuid()"))
+  partnershipId String
+  partnership   Partnership                @relation(fields: [partnershipId], references: [id], onDelete: Cascade)
+  type          PartnershipInteractionType @default(OTHER)
+  subject       String?
+  body          String?
+  occurredAt    DateTime                   @default(now())
+  participants  Json? // [{name, organization}] — display only
+  nextAction    String?
+  nextActionAt  DateTime?
+  createdById   String // plain id
+  createdAt     DateTime                   @default(now())
+  updatedAt     DateTime                   @updatedAt
+
+  followUps PartnershipFollowUp[]
+
+  @@index([partnershipId, occurredAt(sort: Desc)])
+}
+
+model PartnershipFollowUp {
+  id            String                    @id @default(dbgenerated("gen_random_uuid()"))
+  partnershipId String
+  partnership   Partnership               @relation(fields: [partnershipId], references: [id], onDelete: Cascade)
+  interactionId String?
+  interaction   PartnershipInteraction?   @relation(fields: [interactionId], references: [id], onDelete: SetNull)
+  title         String
+  dueAt         DateTime?
+  status        PartnershipFollowUpStatus @default(OPEN)
+  ownerId       String? // plain id
+  completedAt   DateTime?
+  createdAt     DateTime                  @default(now())
+  updatedAt     DateTime                  @updatedAt
+
+  @@index([partnershipId, status])
+  @@index([dueAt])
+}
+
+model PartnershipNote {
+  id            String      @id @default(dbgenerated("gen_random_uuid()"))
+  partnershipId String
+  partnership   Partnership @relation(fields: [partnershipId], references: [id], onDelete: Cascade)
+  body          String
+  authorId      String // plain id
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@index([partnershipId, createdAt])
+}
+
+// ─────────────────────────────────────────────────────────────
+// INTERNATIONAL
+// ─────────────────────────────────────────────────────────────
+
+model InternationalOpportunity {
+  id                   String                   @id @default(dbgenerated("gen_random_uuid()"))
+  titleAr              String
+  titleFr              String
+  titleEn              String
+  descriptionAr        String?
+  descriptionFr        String?
+  descriptionEn        String?
+  countryId            String?
+  country              Country?                 @relation(fields: [countryId], references: [id])
+  city                 String?
+  region               String? // free-text region/state (spec §5)
+  program              String // programme name (e.g. EVS/ESC, WorkCamp, internship)
+  provider             String // hosting organisation name
+  category             InternationalProjectType @default(OTHER) // §6 project type
+  skills               String? // required skills, keyword text (spec §5)
+  eligibility          String?
+  ageRequirements      String?
+  minAge               Int? // structured bounds powering the deterministic eligibility check (§11)
+  maxAge               Int?
+  languageRequirements String?
+  duration             String?
+  startDate            DateTime?
+  endDate              DateTime?
+  deadline             DateTime?
+  accommodation        BenefitValue             @default(UNKNOWN)
+  food                 BenefitValue             @default(UNKNOWN)
+  transportation       BenefitValue             @default(UNKNOWN)
+  insurance            BenefitValue             @default(UNKNOWN)
+  // Remaining §5 benefit flags — UNKNOWN unless the source states otherwise.
+  visaSupport          BenefitValue             @default(UNKNOWN)
+  training             BenefitValue             @default(UNKNOWN)
+  certificateProvided  BenefitValue             @default(UNKNOWN)
+  fees                 BenefitValue             @default(UNKNOWN)
+  funding              BenefitValue             @default(UNKNOWN)
+  allowance            BenefitValue             @default(UNKNOWN)
+  travelSupport        BenefitValue             @default(UNKNOWN)
+  visaInformation      String?
+  applicationMethod    String?
+  officialSource       String?
+  sourceUrl            String?
+  sourceId             String?
+  source               OpportunitySource?       @relation(fields: [sourceId], references: [id])
+  sourceType           SourceType               @default(EXTERNAL) // OFFICIAL | VERIFIED_PARTNER | EXTERNAL
+  verificationStatus   VerificationStatus       @default(PENDING)
+  verifiedAt           DateTime?
+  opportunityId        String? // mirrored standard opportunity, if any
+  createdAt            DateTime                 @default(now())
+  updatedAt            DateTime                 @updatedAt
+
+  applications       InternationalApplication[]
+  experiences        InternationalExperience[]
+  verificationEvents InternationalVerificationEvent[]
+
+  @@index([verificationStatus])
+  @@index([deadline])
+  @@index([countryId])
+  @@index([sourceType])
+  @@index([category])
+}
+
+model InternationalExperience {
+  id                 String                    @id @default(dbgenerated("gen_random_uuid()"))
+  volunteerProfileId String
+  volunteerProfile   VolunteerProfile          @relation(fields: [volunteerProfileId], references: [id], onDelete: Cascade)
+  countryId          String?
+  country            Country?                  @relation(fields: [countryId], references: [id])
+  opportunityId      String? // linked offer when the experience descends from one
+  opportunity        InternationalOpportunity? @relation(fields: [opportunityId], references: [id])
+  organizationName   String
+  program            String
+  role               String? // volunteer role during the program (spec §21)
+  activity           String?
+  startDate          DateTime
+  endDate            DateTime?
+  hours              Decimal?                  @db.Decimal(6, 2)
+  certificateId      String?
+  verified           Boolean                   @default(false)
+  verifiedBy         String? // userId of the platform reviewer (spec §21)
+  verifiedAt         DateTime?
+  sourceUrl          String?
+  createdAt          DateTime                  @default(now())
+  updatedAt          DateTime                  @updatedAt
+
+  @@index([volunteerProfileId])
+  @@index([verified])
+}
+
+// International application (spec §9) — separate from OpportunityApplication
+// because the state machine and payload differ; local applications untouched.
+model InternationalApplication {
+  id                 String                         @id @default(dbgenerated("gen_random_uuid()"))
+  opportunityId      String
+  opportunity        InternationalOpportunity       @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  volunteerProfileId String
+  volunteerProfile   VolunteerProfile               @relation(fields: [volunteerProfileId], references: [id], onDelete: Cascade)
+  status             InternationalApplicationStatus @default(SUBMITTED)
+  motivationLetter   String?
+  languages          String?
+  availability       String?
+  previousExperience String?
+  passportReadiness  InternationalPassportReadiness @default(NOT_AVAILABLE)
+  submittedAt        DateTime                       @default(now())
+  reviewedAt         DateTime?
+  reviewedById       String?
+  decisionNote       String?
+  createdAt          DateTime                       @default(now())
+  updatedAt          DateTime                       @updatedAt
+
+  // One *active* application per volunteer per offer; WITHDRAWN/REJECTED rows
+  // do not block a re-application (partial unique index in 0007, mirroring
+  // the local applications rule in 0002).
+  @@index([opportunityId, status])
+  @@index([volunteerProfileId, status])
+  @@index([submittedAt])
+}
+
+// Append-only verification history for international offers (spec §8) —
+// rows are never updated or deleted.
+model InternationalVerificationEvent {
+  id            String                   @id @default(dbgenerated("gen_random_uuid()"))
+  opportunityId String
+  opportunity   InternationalOpportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  status        VerificationStatus
+  notes         String?
+  checkedById   String?
+  checkedAt     DateTime                 @default(now())
+
+  @@index([opportunityId, checkedAt])
+}
+
+// ─────────────────────────────────────────────────────────────
+// TRUST, MODERATION, AUDIT
+// ─────────────────────────────────────────────────────────────
+
+model Report {
+  id           String           @id @default(dbgenerated("gen_random_uuid()"))
+  reporterId   String
+  reporter     User             @relation("ReportReporter", fields: [reporterId], references: [id])
+  targetType   ReportTargetType
+  targetId     String
+  reason       String
+  description  String?
+  status       ReportStatus     @default(OPEN)
+  assignedToId String?
+  assignedTo   User?            @relation("ReportAssignee", fields: [assignedToId], references: [id])
+  resolution   String?
+  createdAt    DateTime         @default(now())
+  resolvedAt   DateTime?
+
+  @@index([status, createdAt])
+  @@index([targetType, targetId])
+  @@index([assignedToId])
+}
+
+model RiskAssessment {
+  id                String            @id @default(dbgenerated("gen_random_uuid()"))
+  targetType        RiskTargetType
+  targetId          String
+  riskScore         Int // 0-100
+  riskLevel         RiskLevel
+  reasons           Json // [{code, weight, detail}]
+  recommendedAction RecommendedAction
+  engineVersion     String            @default("rules-v1")
+  decidedById       String? // human decision on the recommendation
+  decision          String? // approve | restrict | suspend | override
+  decisionNote      String?
+  decidedAt         DateTime?
+  createdAt         DateTime          @default(now())
+
+  @@index([targetType, targetId])
+  @@index([riskLevel, createdAt])
+}
+
+model AuditLog {
+  id             String        @id @default(dbgenerated("gen_random_uuid()"))
+  actorUserId    String?
+  actor          User?         @relation("AuditActor", fields: [actorUserId], references: [id])
+  action         String // USER_ROLE_CHANGED, ORGANIZATION_VERIFIED, HOURS_VERIFIED, ...
+  entityType     String
+  entityId       String
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  metadata       Json? // never contains passwords or tokens
+  ipAddress      String?
+  userAgent      String?
+  requestId      String?
+  createdAt      DateTime      @default(now())
+
+  @@index([entityType, entityId])
+  @@index([actorUserId, createdAt])
+  @@index([action, createdAt])
+  @@index([organizationId])
+  // Created by 0002's raw SQL and never declared here: P33's
+  // `migrate diff --from-schema-database` surfaced it as drift and dropped
+  // it — re-declared so no future diff can take the audit timeline's index.
+  @@index([createdAt(sort: Desc)])
+}
+
+model AdminAction {
+  id          String   @id @default(dbgenerated("gen_random_uuid()"))
+  adminUserId String
+  admin       User     @relation(fields: [adminUserId], references: [id])
+  action      String // approve | reject | request_info | restrict | suspend | restore
+  targetType  String
+  targetId    String
+  reason      String?
+  notes       String?
+  requestId   String?
+  createdAt   DateTime @default(now())
+
+  @@index([targetType, targetId])
+  @@index([adminUserId, createdAt])
+}
+
+model Incident {
+  id           String           @id @default(dbgenerated("gen_random_uuid()"))
+  type         IncidentType
+  severity     IncidentSeverity @default(MEDIUM)
+  status       IncidentStatus   @default(OPEN)
+  title        String
+  description  String?
+  reporterId   String?
+  reporter     User?            @relation("IncidentReporter", fields: [reporterId], references: [id])
+  assignedToId String?
+  assignedTo   User?            @relation("IncidentAssignee", fields: [assignedToId], references: [id])
+  resolution   String?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  resolvedAt   DateTime?
+
+  events IncidentEvent[]
+
+  @@index([status, severity])
+}
+
+model IncidentEvent {
+  id          String   @id @default(dbgenerated("gen_random_uuid()"))
+  incidentId  String
+  incident    Incident @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+  actorUserId String?
+  note        String
+  createdAt   DateTime @default(now())
+
+  @@index([incidentId, createdAt])
+}
+
+// ─────────────────────────────────────────────────────────────
+// NOTIFICATIONS & MESSAGING
+// ─────────────────────────────────────────────────────────────
+
+model Notification {
+  id        String           @id @default(dbgenerated("gen_random_uuid()"))
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      NotificationType
+  title     String
+  body      String
+  data      Json?
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+
+  deliveries NotificationDelivery[]
+
+  @@index([userId, readAt])
+  @@index([userId, createdAt(sort: Desc)])
+}
+
+model NotificationDelivery {
+  id             String              @id @default(dbgenerated("gen_random_uuid()"))
+  notificationId String
+  notification   Notification        @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+  channel        NotificationChannel
+  status         DeliveryStatus      @default(QUEUED)
+  sentAt         DateTime?
+  error          String?
+  createdAt      DateTime            @default(now())
+
+  @@index([channel, status])
+}
+
+model NotificationPreference {
+  id        String              @id @default(dbgenerated("gen_random_uuid()"))
+  userId    String
+  user      User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      NotificationType
+  channel   NotificationChannel
+  enabled   Boolean             @default(true)
+  updatedAt DateTime            @updatedAt
+
+  @@unique([userId, type, channel])
+}
+
+model Conversation {
+  id        String           @id @default(dbgenerated("gen_random_uuid()"))
+  type      ConversationType @default(DIRECT)
+  subject   String?
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  members  ConversationMember[]
+  messages Message[]
+
+  @@index([updatedAt])
+}
+
+model ConversationMember {
+  id             String       @id @default(dbgenerated("gen_random_uuid()"))
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organizationId String?
+  lastReadAt     DateTime?
+  muted          Boolean      @default(false)
+  joinedAt       DateTime     @default(now())
+
+  @@unique([conversationId, userId])
+  @@index([userId])
+}
+
+model Message {
+  id             String       @id @default(dbgenerated("gen_random_uuid()"))
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderId       String
+  sender         User         @relation(fields: [senderId], references: [id])
+  body           String
+  attachmentId   String?
+  createdAt      DateTime     @default(now())
+  editedAt       DateTime?
+  deletedAt      DateTime?
+
+  reads MessageRead[]
+
+  @@index([conversationId, createdAt])
+  // GET /files resolves "shared in a conversation I'm in" through this column.
+  @@index([attachmentId])
+  // 0002 raw SQL, undeclared until P33 (the P33 diff dropped it; re-declared).
+  @@index([createdAt(sort: Desc)])
+}
+
+model MessageRead {
+  id        String   @id @default(dbgenerated("gen_random_uuid()"))
+  messageId String
+  message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  userId    String
+  readAt    DateTime @default(now())
+
+  @@unique([messageId, userId])
+  @@index([userId])
+}
+
+model UserBlock {
+  id        String   @id @default(dbgenerated("gen_random_uuid()"))
+  blockerId String
+  blocker   User     @relation("Blocker", fields: [blockerId], references: [id], onDelete: Cascade)
+  blockedId String
+  blocked   User     @relation("Blocked", fields: [blockedId], references: [id], onDelete: Cascade)
+  reason    String?
+  createdAt DateTime @default(now())
+
+  @@unique([blockerId, blockedId])
+  @@index([blockedId])
+}
+
+// ─────────────────────────────────────────────────────────────
+// SUBSCRIPTIONS, BILLING, DOCUMENTS
+// ─────────────────────────────────────────────────────────────
+
+model Plan {
+  id                        String   @id @default(dbgenerated("gen_random_uuid()"))
+  code                      String   @unique // FREE, BASIC, PROFESSIONAL, ENTERPRISE
+  tier                      PlanTier
+  nameAr                    String
+  nameFr                    String
+  nameEn                    String
+  priceDzd                  Int      @default(0) // pricing lives in data, never hardcoded in logic
+  currency                  String   @default("DZD")
+  periodDays                Int      @default(30)
+  features                  Json?
+  maxSeats                  Int?
+  maxPublishedOpportunities Int?
+  active                    Boolean  @default(true)
+  sortOrder                 Int      @default(0)
+  createdAt                 DateTime @default(now())
+  updatedAt                 DateTime @updatedAt
+
+  subscriptions Subscription[]
+}
+
+model Subscription {
+  id                 String             @id @default(dbgenerated("gen_random_uuid()"))
+  organizationId     String             @unique
+  organization       Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  planId             String
+  plan               Plan               @relation(fields: [planId], references: [id])
+  status             SubscriptionStatus @default(ACTIVE)
+  currentPeriodStart DateTime
+  currentPeriodEnd   DateTime
+  cancelAtPeriodEnd  Boolean            @default(false)
+  cancelledAt        DateTime?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  items    SubscriptionItem[]
+  invoices Invoice[]
+
+  @@index([status, currentPeriodEnd])
+}
+
+model SubscriptionItem {
+  id             String       @id @default(dbgenerated("gen_random_uuid()"))
+  subscriptionId String
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  code           String // e.g. seats, opportunities
+  quantity       Int          @default(1)
+  unitPriceDzd   Int          @default(0)
+
+  @@index([subscriptionId])
+}
+
+model Invoice {
+  id             String        @id @default(dbgenerated("gen_random_uuid()"))
+  organizationId String
+  organization   Organization  @relation(fields: [organizationId], references: [id])
+  subscriptionId String?
+  subscription   Subscription? @relation(fields: [subscriptionId], references: [id])
+  number         String        @unique // INV-2026-000123
+  status         InvoiceStatus @default(ISSUED)
+  amountDzd      Int
+  taxRate        Float         @default(0)
+  totalDzd       Int
+  periodStart    DateTime?
+  periodEnd      DateTime?
+  dueAt          DateTime?
+  paidAt         DateTime?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  items    InvoiceItem[]
+  payments Payment[]
+
+  @@index([organizationId, status])
+  @@index([status, dueAt])
+}
+
+model InvoiceItem {
+  id           String  @id @default(dbgenerated("gen_random_uuid()"))
+  invoiceId    String
+  invoice      Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  description  String
+  quantity     Int     @default(1)
+  unitPriceDzd Int
+  totalDzd     Int
+}
+
+model Payment {
+  id             String        @id @default(dbgenerated("gen_random_uuid()"))
+  organizationId String
+  organization   Organization  @relation(fields: [organizationId], references: [id])
+  invoiceId      String?
+  invoice        Invoice?      @relation(fields: [invoiceId], references: [id])
+  provider       String // bank_transfer | manual | (future providers behind the PaymentProvider interface)
+  method         PaymentMethod
+  amountDzd      Int
+  currency       String        @default("DZD")
+  status         PaymentStatus @default(PENDING)
+  reference      String?       @unique // external/reference number
+  payload        Json? // provider payload — never store card data or secrets
+  occurredAt     DateTime?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([organizationId, status])
+  @@index([status, createdAt])
+}
+
+model Document {
+  id             String             @id @default(dbgenerated("gen_random_uuid()"))
+  ownerId        String?
+  owner          User?              @relation(fields: [ownerId], references: [id])
+  organizationId String?
+  organization   Organization?      @relation(fields: [organizationId], references: [id])
+  type           DocumentType
+  fileName       String // sanitized display name
+  storageKey     String             @unique // opaque storage key — never expose raw paths
+  mimeType       String
+  sizeBytes      Int
+  checksum       String?
+  status         DocumentStatus     @default(QUARANTINED) // uploads quarantined until scanned/validated
+  visibility     DocumentVisibility @default(PRIVATE) // private by default
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+  deletedAt      DateTime?
+
+  verificationDocs     VerificationDocument[]
+  // Partnership & evidence artifacts (P33).
+  agreementDocs        PartnershipAgreement[]
+  obligationEvidence   PartnershipObligation[]
+  installmentEvidence  FundingInstallment[]
+  disbursementEvidence Disbursement[]
+  inKindEvidence       InKindContribution[]
+  impactEvidence       ImpactEvidence[]
+
+  @@index([ownerId])
+  @@index([organizationId])
+  @@index([status])
+}
+
+// ─────────────────────────────────────────────────────────────
+// PRIVACY, SETTINGS, CMS, ANALYTICS
+// ─────────────────────────────────────────────────────────────
+
+model PrivacyConsent {
+  id            String   @id @default(dbgenerated("gen_random_uuid()"))
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  purpose       String // terms | privacy_policy | marketing_email | data_processing
+  policyVersion String
+  granted       Boolean  @default(true)
+  ipAddress     String?
+  createdAt     DateTime @default(now())
+
+  @@index([userId, purpose])
+}
+
+model DataAccessRequest {
+  id          String            @id @default(dbgenerated("gen_random_uuid()"))
+  userId      String
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type        DataRequestType
+  status      DataRequestStatus @default(PENDING)
+  note        String?
+  processedAt DateTime?
+  createdAt   DateTime          @default(now())
+
+  @@index([userId, type])
+  @@index([status])
+}
+
+model DeletionRequest {
+  id           String            @id @default(dbgenerated("gen_random_uuid()"))
+  userId       String
+  user         User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reason       String?
+  status       DataRequestStatus @default(PENDING)
+  scheduledAt  DateTime?
+  anonymizedAt DateTime? // audit history anonymized rather than destroyed (§128)
+  completedAt  DateTime?
+  createdAt    DateTime          @default(now())
+
+  @@index([status])
+}
+
+model Setting {
+  key       String   @id
+  value     Json
+  scope     String   @default("global") // global | organization:<id>
+  updatedBy String?
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+}
+
+model FeatureFlag {
+  key         String   @id
+  description String?
+  enabled     Boolean  @default(false)
+  rollout     Json? // {"development": true, "production": false}
+  updatedAt   DateTime @updatedAt
+  createdAt   DateTime @default(now())
+}
+
+model Counter {
+  name      String   @id // volunteer_id, certificate_number, invoice_number, card_number
+  value     Int      @default(0)
+  updatedAt DateTime @updatedAt
+}
+
+model ContentPage {
+  id             String        @id @default(dbgenerated("gen_random_uuid()"))
+  slug           String        @unique // terms, privacy-policy, safety, faq, ...
+  type           ContentType   @default(PAGE)
+  status         ContentStatus @default(DRAFT)
+  titleAr        String
+  titleFr        String
+  titleEn        String
+  bodyAr         String
+  bodyFr         String
+  bodyEn         String
+  seoDescription String?
+  updatedById    String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([status, type])
+}
+
+model Announcement {
+  id        String    @id @default(dbgenerated("gen_random_uuid()"))
+  titleAr   String
+  titleFr   String
+  titleEn   String
+  bodyAr    String
+  bodyFr    String
+  bodyEn    String
+  active    Boolean   @default(true)
+  startsAt  DateTime?
+  endsAt    DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model FeaturedPlacement {
+  id          String           @id @default(dbgenerated("gen_random_uuid()"))
+  section     PlacementSection
+  targetType  String // OPPORTUNITY | ORGANIZATION | CAMPAIGN
+  targetId    String
+  position    Int              @default(0)
+  sponsored   Boolean          @default(false) // sponsored content is always labeled (§141)
+  label       String?
+  active      Boolean          @default(true)
+  createdById String?
+  createdAt   DateTime         @default(now())
+
+  @@unique([section, targetType, targetId])
+  @@index([section, position])
+}
+
+model HomeContent {
+  id             String   @id @default(dbgenerated("gen_random_uuid()"))
+  heroTitleAr    String
+  heroTitleFr    String
+  heroTitleEn    String
+  heroSubtitleAr String?
+  heroSubtitleFr String?
+  heroSubtitleEn String?
+  primaryCtaAr   String
+  primaryCtaFr   String
+  primaryCtaEn   String
+  secondaryCtaAr String
+  secondaryCtaFr String
+  secondaryCtaEn String
+  announcementId String?
+  updatedById    String?
+  updatedAt      DateTime @updatedAt
+  createdAt      DateTime @default(now())
+}
+
+model AnalyticsEvent {
+  id             String        @id @default(dbgenerated("gen_random_uuid()"))
+  userId         String?
+  user           User?         @relation(fields: [userId], references: [id])
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  eventName      String // USER_REGISTERED, APPLICATION_SUBMITTED, ...
+  entityType     String?
+  entityId       String?
+  properties     Json? // privacy-aware: no sensitive PII
+  createdAt      DateTime      @default(now())
+
+  @@index([eventName, createdAt])
+  @@index([userId])
+  @@index([organizationId])
+}

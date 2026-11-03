@@ -1,0 +1,31 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@bladna/database": ["../../packages/database/src/index.ts"],
+      "@bladna/validation": ["../../packages/validation/src/index.ts"],
+      "@bladna/types": ["../../packages/types/src/index.ts"],
+      "@bladna/domain": ["../../packages/domain/src/index.ts"],
+      "@bladna/auth": ["../../packages/auth/src/index.ts"],
+      "@bladna/utils": ["../../packages/utils/src/index.ts"],
+      "@bladna/ui": ["../../packages/ui/src/index.ts"],
+      "@bladna/config/*": ["../../packages/config/*"]
+    },
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "allowJs": true
+  },
+  "include": [
+    "next-env.d.ts",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "next.config.ts",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": ["node_modules", "**/dist/**", "**/.next/**", "packages/database/src/generated/**"]
+}

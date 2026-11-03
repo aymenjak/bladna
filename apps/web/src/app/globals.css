@@ -1,0 +1,308 @@
+@import 'tailwindcss';
+
+/* The kit lives outside apps/web, and Tailwind v4's automatic source
+ * detection only walks this app's tree (no repo-root .git to climb), so
+ * classes that exist **only** in packages/ui were never emitted — the
+ * tablist's data-[state=active] pill among them (P14: "no colour shows
+ * what I pressed"). Declare the kit as an explicit source. */
+@source '../../../../packages/ui/src';
+
+/*
+ * BLADNA design tokens — P9 "Oasis Modern" retheme (docs/DESIGN.md §11).
+ * Algeria-first: deep jade brand, warm sand neutrals, terracotta clay as a
+ * decorative accent. Status semantics stay sky (info) / amber (warning) /
+ * red (danger) — clay is never semantic. One family, IBM Plex Sans Arabic,
+ * carries Latin and Arabic (next/font injects `--font-plex` on <html>).
+ *
+ * RTL is handled with logical properties (ms-/me-/ps-/pe-/text-start/end),
+ * which follow `<html dir>` set from the resolved locale.
+ *
+ * `@theme static` guarantees every token ships as a CSS variable, including
+ * raw-CSS references (focus ring, selection) and tokens only inline styles
+ * use. Contrast: brand-700 on white 6.9:1, white on brand-700 6.9:1,
+ * sand-500 on page bg 4.7:1, sand-400 (UI) 3.1:1 — see DESIGN.md §11.
+ */
+@theme static {
+  --font-sans:
+    var(--font-plex, 'IBM Plex Sans Arabic'), 'Noto Sans Arabic', system-ui, -apple-system,
+    sans-serif;
+
+  /* P26 display stack — Noto Kufi Arabic (the reference site's headline
+   * family) over Plex; resolved by the RTL heading rule further down. */
+  --font-display: var(--font-kufi, 'Noto Kufi Arabic'), var(--font-sans);
+
+  /* Brand — deep jade emerald (hue ~157), the "verified / civic" green. */
+  --color-brand-50: #effaf4;
+  --color-brand-100: #d9f3e5;
+  --color-brand-200: #b5e6d0;
+  --color-brand-300: #83d3b3;
+  --color-brand-400: #4dbc90;
+  --color-brand-500: #2a9d72;
+  --color-brand-600: #1d7f5a;
+  --color-brand-700: #18664a;
+  --color-brand-800: #14513c;
+  --color-brand-900: #0f4030;
+
+  /* Sand — warm caramel-beige neutrals (500 darkened for the page bg:
+   * 4.7:1 meta text; 950 is the ink of dark surfaces such as the footer). */
+  --color-sand-50: #f7f4ed;
+  --color-sand-100: #f0ebe0;
+  --color-sand-200: #e5dfd1;
+  --color-sand-300: #cbc3b3;
+  --color-sand-400: #9b9282;
+  --color-sand-500: #746c5d;
+  --color-sand-600: #635b4d;
+  --color-sand-700: #4f493f;
+  --color-sand-800: #37332c;
+  --color-sand-900: #211e19;
+  --color-sand-950: #14120e;
+
+  /* Clay — terracotta accent, decorative only (hero glow, editorial marks).
+   * Text on light surfaces uses clay-700 minimum (6.7:1); clay-500+ is
+   * for fills/icons/backgrounds, never a status color. */
+  --color-clay-50: #fdf5ef;
+  --color-clay-100: #fbe8d9;
+  --color-clay-200: #f6d0b4;
+  --color-clay-300: #edb187;
+  --color-clay-400: #e28b55;
+  --color-clay-500: #d66a2c;
+  --color-clay-600: #bc521f;
+  --color-clay-700: #9a411a;
+  --color-clay-800: #7a3517;
+  --color-clay-900: #632d14;
+
+  /* Semantic aliases — the recorded dark-mode prerequisite (DESIGN §10);
+   * today they resolve to the light theme and carry the base layer. */
+  --color-bg: var(--color-sand-50);
+  --color-surface: #ffffff;
+  --color-fg: var(--color-sand-900);
+  --color-muted: var(--color-sand-500);
+  --color-border: var(--color-sand-200);
+
+  /* Radius hierarchy: tile = rounded-lg (8px), control = rounded-xl (12px),
+   * card = rounded-card (14px), sheet/dialog = 2xl+ (kit-owned). */
+  --radius-card: 0.875rem;
+
+  /* One elevation for card-level depth — the border stays the primary cue,
+   * the shadow is a soft warm-tinted lift, not a drop shadow. */
+  --shadow-card: 0 1px 2px 0 rgb(33 30 25 / 0.04), 0 8px 24px -12px rgb(33 30 25 / 0.12);
+
+  /* Shared easing for kit hover/entrance motion. */
+  --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-sans);
+}
+
+/* Arabic benefits from a slightly larger base size for legibility, and — as a
+ * joined script read with taller ascenders/descenders — a more generous line
+ * height than Latin defaults (never compensate per-component). */
+html[lang='ar'] body {
+  font-size: 1.0625rem;
+  line-height: 1.75;
+}
+
+/* P26 — Arabic headlines speak in the display face (Noto Kufi Arabic, the
+ * reference site's family). Scoped to RTL so Latin locales keep Plex's latin
+ * drawings; body copy and controls stay Plex everywhere. */
+[dir='rtl'] h1,
+[dir='rtl'] h2,
+[dir='rtl'] h3,
+[dir='rtl'] h4 {
+  font-family: var(--font-display);
+}
+
+/* Landing hero entrance: a staged 10px rise. Declared ONLY inside the
+ * no-preference query, so users who opt out of motion get a fully static
+ * page (the .hero-rise class then matches nothing). */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes hero-rise {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  .hero-rise {
+    animation: hero-rise 600ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  /* App-surface entrance (dashboard bento, console panels, detail sidebar):
+   * the same staged rise, one notch quicker. Stagger with arbitrary delays
+   * ([animation-delay:80ms] …) — still guarded by this media query, so the
+   * class matches nothing for users who opt out of motion. */
+  .rise {
+    animation: hero-rise 500ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  /* P22 landing: a slow breath for the decorative light washes (hero, stats
+   * band, final CTA). Transform only — the layer's own opacity class stays in
+   * charge — and, like every other keyframe here, declared only inside the
+   * no-preference query so opted-out users get a fully static page. */
+  @keyframes hero-breathe {
+    from {
+      transform: scale(1) translate3d(0, 0, 0);
+    }
+    to {
+      transform: scale(1.08) translate3d(-1.5%, -1%, 0);
+    }
+  }
+
+  .hero-breathe {
+    animation: hero-breathe 16s ease-in-out infinite alternate;
+  }
+}
+
+/* Smooth in-page scrolling, but never for users who opt out of motion. */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* P11 map — hover/focus sync between a pin and its side-list row: the dot
+ * scales up under the shared `is-hot` class the island toggles. Targets the
+ * inner dot only (first child) — Leaflet positions the marker element itself
+ * with a transform, so the pin's screen position can never drift. */
+.bladna-pin.is-hot > a > span:first-child {
+  transform: scale(1.45);
+}
+
+.bladna-cluster.is-hot > span:first-child {
+  transform: scale(1.15);
+}
+
+/* Visible keyboard focus everywhere — the default ring was removed in places
+ * by component resets, so restate it globally for accessibility. */
+:focus-visible {
+  outline: 2px solid var(--color-brand-600);
+  outline-offset: 2px;
+}
+
+/* Brand-tinted text selection to match the identity. */
+::selection {
+  background-color: var(--color-brand-200);
+  color: var(--color-brand-900);
+}
+
+/* ── P26 landing motion — modeled on the reference site (mjeunesse.gov.dz) ──
+ * Same honesty rule as every animation block above: nothing here renders
+ * outside `prefers-reduced-motion: no-preference`, so opted-out users get a
+ * fully static page — and no content ever DEPENDS on an animation to appear
+ * (the slideshow shows its first frame, the ticker shows its text, the
+ * counters show their final figures without a single keyframe running). */
+
+/* Hero slideshow: a slow zoom-and-pan on the active photo (the reference's
+ * `drift`), crossfades between frames via the utility opacity transition. */
+@keyframes hero-drift {
+  from {
+    transform: scale(1.06) translate3d(-1.5%, -1%, 0);
+  }
+  to {
+    transform: scale(1.16) translate3d(1.5%, 1%, 0);
+  }
+}
+
+/* CTA glow ring — a soft white pulse behind the primary pill buttons. */
+@keyframes pulsering {
+  0% {
+    box-shadow: 0 0 0 0 rgb(255 255 255 / 0.5);
+  }
+  70% {
+    box-shadow: 0 0 0 12px rgb(255 255 255 / 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgb(255 255 255 / 0);
+  }
+}
+
+/* Ticker marquees — one keyframe per reading direction; the track holds two
+ * identical copies (each padded via pe-*) so ±50% lands on an exact period. */
+@keyframes marquee-ltr {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes marquee-rtl {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(50%);
+  }
+}
+
+@keyframes reveal-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero-slide {
+    transition: opacity 900ms ease;
+  }
+
+  .hero-slide-active {
+    animation: hero-drift 16s ease-in-out infinite alternate;
+  }
+
+  .pulsering {
+    animation: pulsering 2.6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  /* Marquee: LTR reads leftward, RTL (the default locale) rightward —
+   * matching the reference's marquee-ltr/marquee-rtl pair. Hover or keyboard
+   * focus inside the strip pauses it so the text can actually be read. */
+  .ticker-track {
+    animation: marquee-ltr 36s linear infinite;
+  }
+
+  [dir='rtl'] .ticker-track {
+    animation-name: marquee-rtl;
+  }
+
+  .ticker:hover .ticker-track,
+  .ticker:focus-within .ticker-track {
+    animation-play-state: paused;
+  }
+}
+
+/* Scroll reveal — progressive enhancement only. `animation-timeline: view()`
+ * is Chromium/Edge today, so other engines simply skip the block and render
+ * sections statically; content is never gated on support. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    [data-reveal] {
+      animation: reveal-in linear both;
+      animation-timeline: view();
+      animation-range: entry 5% cover 22%;
+    }
+  }
+}
+
+/* Print: reveal animations (and anything else that could freeze mid-state)
+ * must never hide content on paper. */
+@media print {
+  [data-reveal] {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}

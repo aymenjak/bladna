@@ -1,0 +1,33 @@
+node_modules/
+.next/
+dist/
+build/
+coverage/
+*.tsbuildinfo
+.turbo/
+
+# environment — never commit secrets
+.env
+.env.*
+!.env.example
+
+# local databases / uploads
+var/
+storage/
+*.db
+*.sqlite
+
+# logs / os
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+
+# test artifacts
+playwright-report/
+test-results/
+
+# local tooling / binaries
+cloudflared.exe
+.claude/
+packages/database/src/generated/

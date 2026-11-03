@@ -1,0 +1,115 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    # 396 tests across 36 files: 393 offline cases plus a 3-case DB-gated
+    # suite (tests/db/) that runs for real here — postgres service below, and
+    # `db:migrate:deploy` before the tests so it asserts a migrated database.
+    # On machines without a reachable database that suite skips, never fails.
+    # AUTH_SECRET/DATABASE_URL are set because `next build` validates them at
+    # start-up; DATABASE_URL also matches the postgres service credentials.
+    # The browser suite (`test:e2e`: 15 tests across 7 spec files — admin,
+    # discovery-ui, login, org-review, security-headers, verify,
+    # volunteer-apply) runs after build+seed with the runner's preinstalled
+    # Chrome — no browser download. Requires Next 16 (`src/proxy.ts`
+    # convention) — see docs/RESEARCH.md O1 for the upstream bug this suite
+    # caught on Next 15.5.
+    env:
+      # >= 32 characters (apps/web/src/server/env.ts enforces this at build).
+      AUTH_SECRET: ci-secret-0123456789abcdef0123456789abcdef
+      DATABASE_URL: postgresql://ci:ci@localhost:5432/bladna_ci
+      EMAIL_DRIVER: console
+      DEMO_MODE: 'false'
+
+    services:
+      postgres:
+        # Same major as docker-compose.yml; credentials match the job's
+        # DATABASE_URL (postgresql://ci:ci@localhost:5432/bladna_ci).
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: bladna_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        # Type-check and lint resolve types from @bladna/database, so the
+        # generated client must exist first.
+        run: npm run db:generate --workspace @bladna/database
+
+      - name: Type-check
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Formatting
+        run: npm run format:check
+
+      - name: Route tables & API docs drift check
+        # Fails if two tables register the same METHOD+path, or if docs/API.md
+        # disagrees with what is actually registered (GET /meta wins).
+        run: npm run check
+
+      - name: Validate Prisma schema & migrations
+        # Offline: parses the schema and renders it to SQL (no database needed).
+        run: |
+          npx prisma validate --schema packages/database/prisma/schema.prisma
+          npx prisma migrate diff --from-empty --to-schema-datamodel packages/database/prisma/schema.prisma --script > /dev/null
+
+      - name: Apply migrations to the CI database
+        # The DB-gated suite in tests/db/ asserts migration state, the 0006
+        # column contract and schema<->table coverage — deploy first so those
+        # cases run against a real migrated database instead of skipping.
+        # There is no .env in CI: DATABASE_URL comes from the job env
+        # (prisma.config.ts loads a root .env only when one exists).
+        run: npm run db:migrate:deploy
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Seed demo data (browser E2E fixtures)
+        # The Playwright suite asserts against the seeded demo dataset.
+        # SEED_DEMO is the explicit gate; DEMO_MODE stays false in CI.
+        run: npm run db:seed
+        env:
+          SEED_DEMO: 'true'
+
+      - name: Browser E2E (Playwright)
+        # channel: 'chrome' uses the runner's preinstalled Google Chrome, so no
+        # browser download is needed (cdn.playwright.dev is blocked on the
+        # maintainers' machine). The webServer block starts `next start` itself
+        # here: reuseExistingServer is disabled when CI is set.
+        run: npm run test:e2e
+
+      - name: Docker image build
+        run: docker build -t bladna:ci .

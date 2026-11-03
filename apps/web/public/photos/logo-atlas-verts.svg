@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Association Atlas Verts">
+  <!-- Original mark for the demo tenant: jade tile + leaf (design-refs rule —
+       created for BLADNA, no third-party artwork. -->
+  <rect width="64" height="64" rx="14" fill="#18664a"/>
+  <path d="M49 12C30 14 15 27 15 43c0 4 1 7 3 10 2-6 7-11 14-12 10-2 16-11 17-29Z" fill="#eaf4ee"/>
+  <path d="M18 53c7-11 17-23 30-34" stroke="#18664a" stroke-width="3" stroke-linecap="round" fill="none"/>
+  <path d="M27 44c-1-5-3-9-7-13m17 2c0-4 1-8 3-11" stroke="#18664a" stroke-width="2" stroke-linecap="round" fill="none" opacity=".5"/>
+</svg>

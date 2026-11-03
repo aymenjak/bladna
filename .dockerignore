@@ -1,0 +1,39 @@
+# Build context hygiene — mirrors .gitignore.
+# Most importantly: never bake local secrets (.env) or host build state
+# (Windows node_modules, .next) into the image; the Dockerfile runs its own
+# `npm ci` / `next build`, and compose supplies runtime config via `environment:`.
+# The app's root-.env loader (next.config.ts) treats a missing file as a no-op,
+# so the filtered context is safe for `next build` inside the image.
+
+# secrets — never in the image
+.env
+.env.*
+**/.env
+**/.env.*
+
+# dependencies & build output (installed/built inside the image)
+node_modules
+**/node_modules
+**/.next
+dist
+build
+coverage
+.turbo
+*.tsbuildinfo
+
+# local runtime state (uploads, generated emails, sqlite experiments)
+var
+**/var
+storage
+**/storage
+*.db
+*.sqlite
+
+# logs / OS / VCS / test artifacts
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+.git
+playwright-report
+test-results
