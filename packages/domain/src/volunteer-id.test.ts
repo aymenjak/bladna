@@ -23,6 +23,12 @@ describe('volunteer ID', () => {
     expect(parseVolunteerIdFormat(null)).toEqual(DEFAULT_VOLUNTEER_ID_FORMAT);
   });
 
+  it('treats the bare {PREFIX}-{REGION} template as unset', () => {
+    const format = parseVolunteerIdFormat('{PREFIX}-{REGION}-{SEQ:6}');
+    expect(format).toEqual(DEFAULT_VOLUNTEER_ID_FORMAT);
+    expect(renderVolunteerId(format, 1)).toBe('BLD-ALG-000001');
+  });
+
   it('validates rendered ids', () => {
     expect(isValidVolunteerId('BLD-ALG-000001')).toBe(true);
     expect(isValidVolunteerId('BLD-ALG-1')).toBe(false);

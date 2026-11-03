@@ -62,7 +62,7 @@ export function OpportunityCardIntl({
         </Link>
       </h2>
       <p className="mt-1 text-sm text-sand-500">
-        {dict.international.provider}: {item.provider}
+        {dict.international.provider}: <bdi>{item.provider}</bdi>
       </p>
       {excerpt ? <p className="mt-2 line-clamp-3 text-sm text-sand-600">{excerpt}</p> : null}
       {context === 'country' && item.eligibility ? (
@@ -76,10 +76,14 @@ export function OpportunityCardIntl({
       <div className="mt-auto flex flex-wrap gap-x-4 gap-y-1 border-t border-sand-100 pt-3 text-xs text-sand-500">
         {item.duration ? (
           <span>
-            {durationLabel}: {item.duration}
+            {durationLabel}: <bdi>{item.duration}</bdi>
           </span>
         ) : null}
-        {place ? <span>{place}</span> : null}
+        {place ? (
+          <span>
+            <bdi>{place}</bdi>
+          </span>
+        ) : null}
         {item.deadline ? (
           <span>
             {dict.common.deadline}: {formatDate(item.deadline, locale)}

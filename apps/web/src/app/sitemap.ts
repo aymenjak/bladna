@@ -32,6 +32,7 @@ const STATIC_PATHS = [
   '/register',
   '/terms',
   '/privacy',
+  '/credits',
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {

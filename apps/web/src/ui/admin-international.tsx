@@ -439,7 +439,7 @@ function QueuePanel({ locale, canManage }: { locale: LocaleCode; canManage: bool
           <CardTitle>{submitLabel}</CardTitle>
           <p className="mt-2 text-xs text-sand-500">{dict.admin.intl.hint}</p>
           <form onSubmit={(event) => void submit(event)} className="mt-3 space-y-3">
-            <div className="grid gap-3 sm:grid-cols-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               <Input
                 label={dict.admin.cms.titleAr}
                 required
@@ -459,7 +459,7 @@ function QueuePanel({ locale, canManage }: { locale: LocaleCode; canManage: bool
                 onChange={(event) => setForm({ ...form, titleEn: event.target.value })}
               />
             </div>
-            <div className="grid gap-3 sm:grid-cols-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               <Input
                 label={dict.admin.intl.program}
                 required
@@ -478,7 +478,7 @@ function QueuePanel({ locale, canManage }: { locale: LocaleCode; canManage: bool
                 onChange={(event) => setForm({ ...form, city: event.target.value })}
               />
             </div>
-            <div className="grid gap-3 sm:grid-cols-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               <Input
                 label={dict.admin.intl.duration}
                 value={form.duration}
@@ -924,7 +924,7 @@ function ApplicationsPanel({ locale, canManage }: { locale: LocaleCode; canManag
                   {openRow === row.id ? (
                     <tr className="border-t border-sand-100 bg-sand-50">
                       <td colSpan={5} className="space-y-3 px-3 py-3">
-                        <div className="grid gap-3 text-sm sm:grid-cols-2">
+                        <div className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
                           <div>
                             <p className="text-xs font-medium uppercase text-sand-500">
                               {dict.international.applyMotivation}

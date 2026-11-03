@@ -251,7 +251,7 @@ export default async function OpportunityDetailPage({
           </div>
         ) : null}
 
-        <div className="mt-8 grid gap-8 lg:grid-cols-3">
+        <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-3">
           {/* Main column */}
           <div className="space-y-8 lg:col-span-2">
             <section>

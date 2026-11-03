@@ -29,7 +29,7 @@ test('initiative page zones metric figures, bar and source', async ({ page }) =>
 
   // The provenance sentence sits on its own muted line, not after ` · `.
   await expect(volunteers.getByText('Source:', { exact: true })).toBeVisible();
-  await expect(volunteers.getByText('Registration records (demo dataset)')).toBeVisible();
+  await expect(volunteers.getByText('Registration records')).toBeVisible();
 
   // Both seeded metrics carry targets → each card owns its own bar.
   await expect(page.locator('[data-impact-metric] [role="progressbar"]')).toHaveCount(2);
@@ -54,5 +54,5 @@ test('workspace console Impact tab renders the zoned cards', async ({ page }) =>
   ).toBeVisible();
   await expect(volunteers.getByText('Actual', { exact: true })).toBeVisible();
   await expect(volunteers.getByRole('progressbar')).toBeVisible();
-  await expect(volunteers.getByText('Registration records (demo dataset)')).toBeVisible();
+  await expect(volunteers.getByText('Registration records')).toBeVisible();
 });

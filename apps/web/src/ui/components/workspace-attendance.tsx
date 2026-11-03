@@ -81,7 +81,7 @@ export function CreateSessionForm({
         {dict.workspace.attendance.createSession}
       </h2>
       <p className="mt-1 text-sm text-sand-500">{dict.workspace.attendance.qrHint}</p>
-      <form onSubmit={submit} className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <form onSubmit={submit} className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <div className="sm:col-span-2 lg:col-span-1">
           <label htmlFor="session-name" className="block text-sm font-medium text-sand-700">
             {dict.workspace.attendance.name}
@@ -404,7 +404,7 @@ export function ManualAttendanceForm({
       <h2 className="text-base font-semibold text-sand-900">
         {dict.workspace.attendance.manualTitle}
       </h2>
-      <form onSubmit={submit} className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <form onSubmit={submit} className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div>
           <label htmlFor="manual-volunteer" className="block text-sm font-medium text-sand-700">
             {dict.workspace.attendance.volunteerLabel}

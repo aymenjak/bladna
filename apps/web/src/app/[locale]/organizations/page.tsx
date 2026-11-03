@@ -12,6 +12,8 @@ import { nameFor, type PlaceRef } from '@/ui/opportunity';
 import { directory } from '@/server/modules/organizations';
 import { invoke } from '@/server/ssr';
 import { PageMasthead } from '@/ui/components/page-masthead';
+import { formatNumber } from '@/ui/format';
+import { CompassIcon, MapPinIcon, ShieldCheckIcon, UsersIcon } from '@/ui/components/icons';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,6 +25,7 @@ interface OrgListItem {
   slug: string;
   description: string | null;
   logo: string | null;
+  coverImage: string | null;
   organizationType: OrganizationType;
   verificationStatus: string;
   trustLevel: string;
@@ -167,7 +170,7 @@ export default async function OrganizationsPage({
         {items.length === 0 ? (
           <EmptyState className="mt-12">{dict.organizations.empty}</EmptyState>
         ) : (
-          <ul className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <ul className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {items.map((item) => {
               const location = [nameFor(item.city, locale), nameFor(item.wilaya, locale)]
                 .filter(
@@ -180,46 +183,76 @@ export default async function OrganizationsPage({
                 <Card
                   as="li"
                   key={item.id}
-                  className="flex h-full flex-col p-5 transition hover:border-brand-200 hover:shadow-md"
+                  className="group relative flex h-full flex-col overflow-hidden transition hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-md"
                 >
-                  <div className="flex items-start justify-between gap-2">
-                    <span className="rounded-full bg-sand-100 px-2.5 py-0.5 text-xs font-medium text-sand-700">
-                      {dict.organizations.types[item.organizationType] ?? item.organizationType}
-                    </span>
-                    {verified ? (
-                      <span className="rounded-full bg-brand-100 px-2.5 py-0.5 text-xs font-semibold text-brand-800">
-                        {dict.common.verified}
-                      </span>
+                  {/* Cover band — the organization's own published image. */}
+                  <div className="relative h-28 overflow-hidden bg-gradient-to-br from-brand-700 to-brand-900">
+                    {item.coverImage ? (
+                      <img
+                        src={item.coverImage}
+                        alt=""
+                        loading="lazy"
+                        className="size-full object-cover opacity-90 transition duration-500 group-hover:scale-105"
+                      />
                     ) : null}
-                  </div>
-                  <div className="mt-3 flex items-center gap-3">
-                    <Avatar aria-hidden src={item.logo ?? undefined}>
-                      {item.name.slice(0, 1)}
-                    </Avatar>
-                    <div className="min-w-0">
-                      <h2 className="truncate text-base font-semibold leading-snug text-sand-900">
-                        <Link
-                          href={`/${locale}/organizations/${item.slug}`}
-                          className="hover:text-brand-800"
-                        >
-                          {item.name}
-                        </Link>
-                      </h2>
-                      {location ? (
-                        <p className="truncate text-sm text-sand-500">{location}</p>
+                    <div className="absolute inset-x-3 top-3 flex items-start justify-between gap-2">
+                      <span className="rounded-full bg-white/95 px-2.5 py-0.5 text-xs font-medium text-sand-700 shadow-sm">
+                        {dict.organizations.types[item.organizationType] ?? item.organizationType}
+                      </span>
+                      {verified ? (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-brand-700 px-2.5 py-0.5 text-xs font-semibold text-white shadow-sm">
+                          <ShieldCheckIcon className="size-3.5" />
+                          {dict.common.verified}
+                        </span>
                       ) : null}
                     </div>
                   </div>
-                  {item.description ? (
-                    <p className="mt-3 line-clamp-3 text-sm text-sand-600">{item.description}</p>
-                  ) : null}
-                  <div className="mt-auto flex flex-wrap gap-x-4 gap-y-1 border-t border-sand-100 pt-3 text-xs text-sand-500">
-                    <span>
-                      {dict.organizations.members}: {item._count.members}
-                    </span>
-                    <span>
-                      {dict.organizations.opportunities}: {item._count.opportunities}
-                    </span>
+                  <div className="flex flex-1 flex-col p-5 pt-0">
+                    <div className="-mt-7 flex items-end gap-3">
+                      <Avatar
+                        aria-hidden
+                        src={item.logo ?? undefined}
+                        className="size-14 shrink-0 rounded-xl border-4 border-white bg-brand-700 text-lg text-white shadow"
+                      >
+                        {item.name.slice(0, 1)}
+                      </Avatar>
+                    </div>
+                    <h2
+                      dir="auto"
+                      className="mt-3 line-clamp-2 text-start text-base font-bold leading-snug text-sand-900"
+                    >
+                      <Link
+                        href={`/${locale}/organizations/${item.slug}`}
+                        className="after:absolute after:inset-0 hover:text-brand-800 focus-visible:outline-none"
+                      >
+                        {item.name}
+                      </Link>
+                    </h2>
+                    {location ? (
+                      <p className="mt-1 inline-flex items-center gap-1 text-sm text-sand-500">
+                        <MapPinIcon className="size-3.5" />
+                        {location}
+                      </p>
+                    ) : null}
+                    {item.description ? (
+                      <p
+                        dir="auto"
+                        className="mt-3 line-clamp-3 text-start text-sm leading-relaxed text-sand-600"
+                      >
+                        {item.description}
+                      </p>
+                    ) : null}
+                    <div className="mt-auto flex flex-wrap gap-x-4 gap-y-1 border-t border-sand-100 pt-3 text-xs text-sand-500">
+                      <span className="inline-flex items-center gap-1">
+                        <UsersIcon className="size-3.5" />
+                        {dict.organizations.members}: {formatNumber(item._count.members, locale)}
+                      </span>
+                      <span className="inline-flex items-center gap-1">
+                        <CompassIcon className="size-3.5" />
+                        {dict.organizations.opportunities}:{' '}
+                        {formatNumber(item._count.opportunities, locale)}
+                      </span>
+                    </div>
                   </div>
                 </Card>
               );

@@ -30,6 +30,7 @@ export const fr: Dictionary = {
     help: 'Aide',
     terms: 'Conditions',
     privacy: 'Confidentialité',
+    credits: 'Crédits photos',
   },
   landing: {
     heroTitle: 'Le bien ne passe jamais inaperçu.',
@@ -108,6 +109,86 @@ export const fr: Dictionary = {
         title: 'Un espace de confiance',
         body: 'Tous travaillent à partir du même dossier vérifiable — citoyen, bénévole, initiative, association, entreprise et autorité.',
       },
+    },
+    startHere: {
+      eyebrow: 'Guide express',
+      title: 'BLADNA en une minute : qui êtes-vous ?',
+      body: 'Choisissez votre profil pour voir votre parcours, étape par étape.',
+      rolesLabel: 'Choisissez votre profil',
+      roles: [
+        {
+          key: 'volunteer',
+          label: 'Je suis bénévole',
+          tagline: 'Je veux aider et que mon engagement compte',
+          steps: [
+            {
+              title: 'Créez votre compte',
+              body: 'Deux minutes suffisent, et vous recevez votre numéro de bénévole.',
+            },
+            {
+              title: 'Choisissez une initiative',
+              body: 'Filtrez par wilaya et par cause, puis postulez.',
+            },
+            {
+              title: 'Participez et pointez',
+              body: 'Scannez le QR code sur place pour confirmer votre présence.',
+            },
+            {
+              title: 'Recevez votre certificat',
+              body: 'L’organisation valide vos heures et un certificat vérifiable est émis à votre nom.',
+            },
+          ],
+          liveLabel: 'initiatives publiées en ce moment',
+          cta: 'Créer mon compte',
+          href: '/register',
+        },
+        {
+          key: 'organization',
+          label: 'Je suis une association',
+          tagline: 'Je veux organiser des initiatives et trouver des bénévoles',
+          steps: [
+            {
+              title: 'Inscrivez votre organisation',
+              body: 'Créez un compte organisation et invitez votre équipe.',
+            },
+            {
+              title: 'Faites-vous vérifier',
+              body: 'Nous examinons vos documents pour vous attribuer le badge « vérifiée ».',
+            },
+            {
+              title: 'Publiez votre initiative',
+              body: 'Indiquez vos besoins en bénévoles et en soutien, recevez les candidatures.',
+            },
+            {
+              title: 'Validez les heures',
+              body: 'Enregistrez les présences, validez les heures et émettez les certificats.',
+            },
+          ],
+          liveLabel: 'organisations actives sur la plateforme',
+          cta: 'Inscrire mon organisation',
+          href: '/register?accountType=ORGANIZATION',
+        },
+        {
+          key: 'verifier',
+          label: 'Je vérifie un certificat',
+          tagline: 'Employeur, université ou toute institution',
+          steps: [
+            {
+              title: 'Obtenez le code',
+              body: 'Chaque certificat porte un code unique : demandez-le à son titulaire.',
+            },
+            { title: 'Ouvrez la page de vérification', body: 'Aucun compte n’est nécessaire.' },
+            {
+              title: 'Saisissez le code',
+              body: 'Il est comparé instantanément à l’enregistrement d’origine.',
+            },
+            { title: 'Lisez le résultat', body: 'Qui l’a émis, et s’il est valide ou révoqué.' },
+          ],
+          liveLabel: 'certificats valides vérifiables',
+          cta: 'Vérifier un certificat',
+          href: '/verify',
+        },
+      ],
     },
     pillarsTitle: 'Une plateforme, trois garanties',
     pillars: {
@@ -706,6 +787,47 @@ export const fr: Dictionary = {
     contributionCancelled: 'Votre contribution a été annulée.',
     bankTransferHint:
       'Le versement se fait par virement bancaire vers l’organisation ; la plateforme enregistre votre engagement et l’organisation le confirme — aucun paiement en ligne n’est traité ici.',
+    explainerTitle: 'C’est quoi une campagne ?',
+    explainerSteps: [
+      {
+        title: 'Un grand objectif porté par une association vérifiée',
+        body: 'Une campagne regroupe plusieurs initiatives autour d’un même but, comme « Hiver solidaire » ou « Algérie verte ».',
+      },
+      {
+        title: 'Donnez de votre temps',
+        body: 'Inscrivez-vous à la campagne puis postulez à l’une de ses initiatives : vos heures sont comptées.',
+      },
+      {
+        title: 'Soutenez financièrement',
+        body: 'Engagez un montant versé directement sur le compte bancaire de l’association ; le total est affiché en toute transparence.',
+      },
+    ],
+    viewDetails: 'Voir la campagne',
+    organizedBy: 'Organisée par',
+    daysLeft: 'Encore {n} jours',
+    startsIn: 'Commence dans {n} jours',
+    endsToday: 'Se termine aujourd’hui',
+    ended: 'Campagne terminée',
+    progressOf: '{value} sur {target}',
+    initiatives: 'initiatives',
+    volunteersProgress: 'Bénévoles engagés',
+    fundingProgress: 'Financement confirmé',
+    howToJoinTitle: 'Comment participer à cette campagne ?',
+    howToJoinSteps: [
+      {
+        title: 'Rejoignez la campagne',
+        body: 'Cliquez sur « Rejoindre » pour suivre ses actualités et ses nouvelles initiatives.',
+      },
+      {
+        title: 'Choisissez une initiative',
+        body: 'Postulez à l’une des initiatives liées ci-dessous selon votre wilaya et vos disponibilités.',
+      },
+      {
+        title: 'Participez ou soutenez',
+        body: 'Venez sur place pour que vos heures soient certifiées, ou engagez une contribution.',
+      },
+    ],
+    activeCount: 'campagnes en cours',
     contributionStatuses: {
       PENDING: 'En attente de confirmation',
       CONFIRMED: 'Confirmée',
@@ -2204,7 +2326,7 @@ export const fr: Dictionary = {
       title: 'Conditions d’utilisation',
       intro:
         'Ces conditions régissent votre usage de BLADNA — la plateforme d’identité du bénévolat, d’expérience vérifiée et d’opportunités.',
-      updated: 'Dernière mise à jour : 23 septembre 2026',
+      updated: 'Dernière mise à jour : 3 novembre 2026',
       sections: [
         {
           heading: '1. Qui nous sommes',
@@ -2212,7 +2334,7 @@ export const fr: Dictionary = {
         },
         {
           heading: '2. Votre compte',
-          body: 'Vous devez fournir des informations exactes et garder vos identifiants secrets. Vous êtes responsable de tout ce qui se passe sous votre compte. Les représentants d’organisation confirment être habilités à agir pour l’organisation qu’ils inscrivent. Vous devez avoir au moins 16 ans, ou le consentement d’un tuteur là où la loi l’exige.',
+          body: 'Vous devez fournir des informations exactes et garder vos identifiants secrets. Vous êtes responsable de tout ce qui se passe sous votre compte. Les représentants d’organisation confirment être habilités à agir pour l’organisation qu’ils inscrivent. Vous devez avoir au moins 16 ans. Avant 19 ans (âge de la majorité en Algérie), le consentement d’un parent ou du tuteur légal est obligatoire, conformément à la loi 18-07.',
         },
         {
           heading: '3. Usage acceptable',
@@ -2238,13 +2360,17 @@ export const fr: Dictionary = {
           heading: '8. Responsabilité',
           body: 'Le service est fourni « en l’état ». Dans les limites permises par la loi, nous ne sommes pas responsables des dommages indirects ni du contenu publié par les organisations. Rien dans ces conditions ne limite les droits que vous confère la loi algérienne de la consommation.',
         },
+        {
+          heading: '9. Droit applicable',
+          body: 'Les présentes conditions sont régies par le droit algérien. Tout litige qui ne peut être réglé à l’amiable relève des juridictions algériennes compétentes.',
+        },
       ],
     },
     privacy: {
       title: 'Politique de confidentialité',
       intro:
         'Cette politique explique quelles données personnelles BLADNA collecte, pourquoi elles sont traitées, et quels droits vous avez sur elles.',
-      updated: 'Dernière mise à jour : 23 septembre 2026',
+      updated: 'Dernière mise à jour : 3 novembre 2026',
       sections: [
         {
           heading: '1. Données collectées',
@@ -2268,17 +2394,41 @@ export const fr: Dictionary = {
         },
         {
           heading: '6. Vos droits',
-          body: 'Vous pouvez consulter et corriger vos données dans les paramètres, contrôler ce qui est public via les interrupteurs de confidentialité, et demander la suppression de votre compte. Pour tout ce que vous ne pouvez pas régler seul, contactez le support depuis la page Sécurité.',
+          body: 'Conformément à la loi 18-07, vous disposez d’un droit à l’information, d’accès, de rectification, d’opposition pour motif légitime, de retrait de votre consentement à tout moment et de suppression. La plupart se font directement depuis les paramètres et les interrupteurs de confidentialité, et votre dossier s’exporte depuis votre profil. Pour le reste, contactez-nous via la page Sécurité ; nous répondons dans les délais légaux. Vous pouvez aussi saisir l’Autorité nationale de protection des données à caractère personnel (ANPDP).',
         },
         {
           heading: '7. Sécurité',
-          body: 'Les mots de passe sont hachés, les sessions sont révocables par appareil, l’authentification à deux facteurs est disponible pour tout compte et exigée pour les actions du personnel, toutes les écritures sensibles sont validées et auditées, et les mutations transverses d’origine sont rejetées. Aucun système n’est parfaitement sûr, mais ces contrôles sont inscrits dans le code, pas seulement dans une politique.',
+          body: 'Les mots de passe sont hachés avec scrypt et jamais stockés en clair ; les jetons de session, de réinitialisation et de présence ne sont conservés que sous forme d’empreinte SHA-256 ; les secrets de double authentification sont chiffrés au repos en AES-256-GCM ; les connexions passent par HTTPS et les cookies d’authentification sont HttpOnly et Secure. Les sessions sont révocables par appareil, la double authentification est disponible pour tous et obligatoire pour les actions du personnel, et chaque écriture sur un enregistrement sensible est validée et journalisée. Aucun système n’est parfaitement sûr, mais ces contrôles sont appliqués dans le code, pas seulement dans ce texte.',
         },
         {
           heading: '8. Contact',
           body: 'Toute question sur cette politique ou vos données peut être posée depuis la page Sécurité. Si vous avez une préoccupation sur le traitement de vos données, dites-le nous d’abord pour que nous puissions enquêter et répondre.',
         },
+        {
+          heading: '9. Cadre légal',
+          body: 'Les données personnelles sont traitées conformément à la loi n° 18-07 du 10 juin 2018 relative à la protection des personnes physiques dans le traitement des données à caractère personnel. L’opérateur de ce déploiement est le responsable du traitement et effectue la déclaration préalable auprès de l’Autorité nationale de protection des données à caractère personnel (ANPDP).',
+        },
+        {
+          heading: '10. Transferts hors d’Algérie',
+          body: 'Vos données ne sont pas transférées hors d’Algérie sans l’autorisation exigée par la loi 18-07. Les opportunités internationales sont affichées à titre informatif : vos données ne sont transmises à une organisation étrangère que si vous y postulez vous-même.',
+        },
+        {
+          heading: '11. Cookies',
+          body: 'BLADNA n’utilise que des cookies strictement nécessaires : la connexion (session et renouvellement) et le choix de langue. Aucun cookie publicitaire ni de suivi.',
+        },
+        {
+          heading: '12. Mineurs',
+          body: 'Les bénévoles de moins de 19 ans ne peuvent s’inscrire qu’avec le consentement d’un parent ou du tuteur légal, qui peut exercer pour eux les droits décrits ci-dessus.',
+        },
       ],
+    },
+    credits: {
+      title: 'Crédits photos',
+      intro:
+        'Toutes les photos de BLADNA sont de vraies photos d’Algérie, publiées sous licence libre sur Wikimedia Commons. Nous remercions leurs auteurs et les citons ici comme l’exige la licence.',
+      author: 'Auteur',
+      license: 'Licence',
+      source: 'Source',
     },
   },
   errors: {

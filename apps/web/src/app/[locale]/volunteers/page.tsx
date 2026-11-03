@@ -247,7 +247,7 @@ export default async function VolunteersPage({
             {dict.directory.empty} {dict.directory.emptyBody}
           </EmptyState>
         ) : (
-          <ul className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <ul className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {items.map((item) => {
               const location = [nameFor(item.city, locale), nameFor(item.wilaya, locale)]
                 .filter(
@@ -293,7 +293,9 @@ export default async function VolunteersPage({
                     </div>
                   </div>
                   {item.bio ? (
-                    <p className="mt-3 line-clamp-3 text-sm text-sand-600">{item.bio}</p>
+                    <p dir="auto" className="mt-3 line-clamp-3 text-start text-sm text-sand-600">
+                      {item.bio}
+                    </p>
                   ) : null}
                   {item.skills.length > 0 ? (
                     <ul className="mt-3 flex flex-wrap gap-2" aria-label={dict.common.skills}>

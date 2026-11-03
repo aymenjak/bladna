@@ -153,7 +153,7 @@ export function SettingsForm({
   }
 
   return (
-    <form onSubmit={submit} className="mt-4 grid gap-4 sm:grid-cols-2">
+    <form onSubmit={submit} className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
       <div>
         <label htmlFor="org-name" className="block text-sm font-medium text-sand-700">
           {dict.workspace.settings.nameLabel}

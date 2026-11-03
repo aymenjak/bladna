@@ -168,7 +168,7 @@ export function ProfileForm({ locale, user }: { locale: LocaleCode; user: MeUser
         {error ? <Alert tone="danger">{error}</Alert> : null}
         {saved ? <Alert tone="success">{dict.settings.savedOk}</Alert> : null}
 
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Input
             label={dict.auth.firstName}
             name="firstName"

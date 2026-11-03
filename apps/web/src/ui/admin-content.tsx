@@ -401,7 +401,7 @@ function PagesView({ locale, canManage }: { locale: LocaleCode; canManage: boole
         <Card>
           <CardTitle>{submitLabel}</CardTitle>
           <form onSubmit={(event) => void submit(event)} className="mt-3 space-y-3">
-            <div className="grid gap-3 sm:grid-cols-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               <Input
                 label={dict.admin.cms.slug}
                 required
@@ -433,7 +433,7 @@ function PagesView({ locale, canManage }: { locale: LocaleCode; canManage: boole
                 ))}
               </Select>
             </div>
-            <div className="grid gap-3 sm:grid-cols-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               <Input
                 label={dict.admin.cms.titleAr}
                 required
@@ -453,7 +453,7 @@ function PagesView({ locale, canManage }: { locale: LocaleCode; canManage: boole
                 onChange={(event) => setForm({ ...form, titleEn: event.target.value })}
               />
             </div>
-            <div className="grid gap-3 sm:grid-cols-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               <Textarea
                 label={dict.admin.cms.bodyAr}
                 required
@@ -674,7 +674,7 @@ function AnnouncementsView({ locale, canManage }: { locale: LocaleCode; canManag
         <Card>
           <CardTitle>{submitLabel}</CardTitle>
           <form onSubmit={(event) => void submit(event)} className="mt-3 space-y-3">
-            <div className="grid gap-3 sm:grid-cols-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               <Input
                 label={dict.admin.cms.titleAr}
                 required
@@ -694,7 +694,7 @@ function AnnouncementsView({ locale, canManage }: { locale: LocaleCode; canManag
                 onChange={(event) => setForm({ ...form, titleEn: event.target.value })}
               />
             </div>
-            <div className="grid gap-3 sm:grid-cols-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               <Textarea
                 label={dict.admin.cms.bodyAr}
                 required
@@ -717,7 +717,7 @@ function AnnouncementsView({ locale, canManage }: { locale: LocaleCode; canManag
                 onChange={(event) => setForm({ ...form, bodyEn: event.target.value })}
               />
             </div>
-            <div className="grid gap-3 sm:grid-cols-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               <Input
                 label={dict.admin.cms.startsAt}
                 type="date"
@@ -950,7 +950,7 @@ function FeaturedView({ locale, canManage }: { locale: LocaleCode; canManage: bo
         <Card>
           <CardTitle>{dict.admin.cms.createPlacement}</CardTitle>
           <form onSubmit={(event) => void submit(event)} className="mt-3 space-y-3">
-            <div className="grid gap-3 sm:grid-cols-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               <Select
                 label={dict.admin.cms.section}
                 value={form.section}
@@ -984,7 +984,7 @@ function FeaturedView({ locale, canManage }: { locale: LocaleCode; canManage: bo
                 onChange={(event) => setForm({ ...form, targetId: event.target.value })}
               />
             </div>
-            <div className="grid gap-3 sm:grid-cols-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               <Input
                 label={dict.admin.cms.position}
                 type="number"
@@ -1194,7 +1194,7 @@ function HomeView({ locale, canManage }: { locale: LocaleCode; canManage: boolea
             <p className="mt-3 text-sm text-sand-500">{dict.common.loading}</p>
           ) : (
             <form onSubmit={(event) => void submit(event)} className="mt-3 space-y-3">
-              <div className="grid gap-3 sm:grid-cols-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                 <Input
                   label={dict.admin.cms.heroTitleAr}
                   required
@@ -1214,7 +1214,7 @@ function HomeView({ locale, canManage }: { locale: LocaleCode; canManage: boolea
                   onChange={(event) => setForm({ ...form, heroTitleEn: event.target.value })}
                 />
               </div>
-              <div className="grid gap-3 sm:grid-cols-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                 <Input
                   label={dict.admin.cms.heroSubtitleAr}
                   value={form.heroSubtitleAr}
@@ -1231,7 +1231,7 @@ function HomeView({ locale, canManage }: { locale: LocaleCode; canManage: boolea
                   onChange={(event) => setForm({ ...form, heroSubtitleEn: event.target.value })}
                 />
               </div>
-              <div className="grid gap-3 sm:grid-cols-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                 <Input
                   label={dict.admin.cms.primaryCtaAr}
                   required
@@ -1251,7 +1251,7 @@ function HomeView({ locale, canManage }: { locale: LocaleCode; canManage: boolea
                   onChange={(event) => setForm({ ...form, primaryCtaEn: event.target.value })}
                 />
               </div>
-              <div className="grid gap-3 sm:grid-cols-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                 <Input
                   label={dict.admin.cms.secondaryCtaAr}
                   required

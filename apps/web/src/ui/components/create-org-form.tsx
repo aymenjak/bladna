@@ -106,7 +106,7 @@ export function CreateOrganizationForm({ locale }: { locale: LocaleCode }) {
       {error ? <Alert tone="danger">{error}</Alert> : null}
       {done ? <Alert tone="success">{dict.workspace.createOrgDone}</Alert> : null}
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Input
           label={dict.workspace.settings.nameLabel}
           name="name"
@@ -130,7 +130,7 @@ export function CreateOrganizationForm({ locale }: { locale: LocaleCode }) {
         </Select>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Input
           label={dict.workspace.settings.legalName}
           name="legalName"
@@ -157,7 +157,7 @@ export function CreateOrganizationForm({ locale }: { locale: LocaleCode }) {
         error={fieldErrors.description}
       />
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Input
           label={dict.workspace.settings.emailLabel}
           name="officialEmail"

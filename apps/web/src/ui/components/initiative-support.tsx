@@ -121,7 +121,7 @@ export function InitiativeSupport({
   }
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
       {needs.map((need) => {
         const label = needLabelFor(need, locale);
         const kindLabel = kindLabels[need.kind as keyof typeof kindLabels] ?? (need.kind as string);

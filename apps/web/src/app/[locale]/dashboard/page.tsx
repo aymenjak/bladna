@@ -309,7 +309,8 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
           {dict.dashboard.eyebrow}
         </p>
         <h1 className="text-3xl font-bold text-sand-900">
-          {dict.dashboard.welcome}, {session.user.firstName}
+          {dict.dashboard.welcome}
+          {locale === 'ar' ? '،' : ','} <bdi>{session.user.firstName}</bdi>
         </h1>
         <p className="text-sand-600">{dict.dashboard.title}</p>
         {/* P10/D6: honest live date under the greeting — the reference
@@ -364,7 +365,7 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
       {/* P10/D8 — two-zone dashboard: work surfaces on the left, a compact
           rail (links, orgs, administration) beside them at lg and stacked
           below it on narrow screens. */}
-      <div className="grid gap-8 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
         <div className="space-y-8 lg:col-span-2">
           {/* Personalized matching strip (P5) — top matches with their reasons
               visible; hidden only when the account has no volunteer profile. */}
@@ -417,8 +418,8 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
                         {titleFor(application.opportunity, locale)}
                       </Link>
                       <p className="text-sm text-sand-500">
-                        {application.opportunity.organization.name} ·{' '}
-                        {formatDate(application.submittedAt, locale)}
+                        <bdi>{application.opportunity.organization.name}</bdi> ·{' '}
+                        <bdi>{formatDate(application.submittedAt, locale)}</bdi>
                       </p>
                     </div>
                     <StatusBadge
@@ -469,7 +470,7 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
                           ? ` · ${Number(offer.amount).toLocaleString(locale)} ${offer.currency ?? 'DZD'}`
                           : ''}
                         {offer.quantity != null ? ` · ×${offer.quantity}` : ''} ·{' '}
-                        {formatDate(offer.createdAt, locale)}
+                        <bdi>{formatDate(offer.createdAt, locale)}</bdi>
                       </p>
                     </div>
                     <StatusBadge

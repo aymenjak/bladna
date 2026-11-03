@@ -4,18 +4,30 @@ import { isAppError, type CampaignStatus } from '@bladna/types';
 import { Card } from '@bladna/ui';
 import { getDictionary, isLocale } from '@/ui/i18n';
 import { formatDate, formatNumber } from '@/ui/format';
-import { locationLineFor, titleFor, type OpportunityListItem } from '@/ui/opportunity';
+import { type OpportunityListItem } from '@/ui/opportunity';
 import { campaignRoutes } from '@/server/modules/campaigns';
 import { discover } from '@/server/modules/opportunities';
 import type { Handler } from '@/server/http';
 import { invoke } from '@/server/ssr';
 import { CampaignContribute } from '@/ui/components/campaign-contribute';
 import { CampaignParticipant } from '@/ui/components/campaign-participant';
+import { InitiativeCard } from '@/ui/components/initiative-card';
+import { ProgressBar, campaignTiming } from '@/ui/components/campaign-meta';
+import {
+  CalendarIcon,
+  CompassIcon,
+  HeartIcon,
+  SearchIcon,
+  ShieldCheckIcon,
+  TargetIcon,
+  UsersIcon,
+} from '@/ui/components/icons';
 import { StatusBadge } from '@/ui/status';
 
 export const dynamic = 'force-dynamic';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const HOW_ICONS = [UsersIcon, SearchIcon, HeartIcon] as const;
 
 /** Look up the public detail handler from the campaigns route table. */
 const DETAIL_HANDLER: Handler = (() => {
@@ -137,186 +149,252 @@ export default async function CampaignDetailPage({
     throw error;
   }
   related = await fetchRelated(id, locale);
+  const timing = campaignTiming(campaign.startDate, campaign.endDate, dict.campaigns, locale);
+  const verified = campaign.organization.verificationStatus === 'VERIFIED';
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-10">
-      <header>
-        <div className="flex flex-wrap items-center gap-2">
-          <StatusBadge
-            status={campaign.status}
-            label={dict.campaigns.statuses[campaign.status] ?? campaign.status}
+    <>
+      {/* Hero — the campaign's own cover under a deep brand gradient, so the
+          name, organizer and timing read before anything else. */}
+      <section className="relative overflow-hidden bg-brand-900 text-white">
+        {campaign.coverImage ? (
+          <img
+            src={campaign.coverImage}
+            alt=""
+            className="absolute inset-0 size-full object-cover opacity-40"
           />
-          {campaign.organization.verificationStatus === 'VERIFIED' ? (
-            <span className="rounded-full bg-brand-100 px-2.5 py-0.5 text-xs font-semibold text-brand-800">
-              {dict.common.verified}
-            </span>
-          ) : null}
-        </div>
-        <h1 className="mt-3 text-3xl font-bold text-sand-900">{campaign.name}</h1>
-        <p className="mt-1 text-sm text-sand-600">
-          {dict.common.organization}:{' '}
-          {campaign.organization.slug ? (
-            <Link
-              href={`/${locale}/organizations/${campaign.organization.slug}`}
-              className="font-semibold text-brand-700 hover:text-brand-800"
-            >
-              {campaign.organization.name}
+        ) : null}
+        <div
+          aria-hidden
+          className="absolute inset-0 bg-gradient-to-t from-brand-900 via-brand-900/85 to-brand-900/40"
+        />
+        <div className="relative mx-auto max-w-6xl px-4 pt-10 pb-12 md:pt-16">
+          <nav aria-label={dict.meta.siteName} className="text-sm text-brand-100">
+            <Link href={`/${locale}/campaigns`} className="hover:text-white">
+              {dict.campaigns.title}
             </Link>
-          ) : (
-            <span className="font-semibold text-sand-800">{campaign.organization.name}</span>
-          )}
-        </p>
-      </header>
-
-      <div className="mt-6 grid gap-6 lg:grid-cols-3">
-        {/* Main column */}
-        <div className="space-y-8 lg:col-span-2">
-          <Card className="p-6">
-            <h2 className="text-lg font-semibold text-sand-900">{dict.campaigns.aboutTitle}</h2>
-            {campaign.description ? (
-              <p className="mt-3 whitespace-pre-line leading-relaxed text-sand-700">
-                {campaign.description}
-              </p>
+            <span aria-hidden className="mx-2">
+              /
+            </span>
+            <span className="text-white">{campaign.name}</span>
+          </nav>
+          <div className="mt-5 flex flex-wrap items-center gap-2">
+            <StatusBadge
+              status={campaign.status}
+              label={dict.campaigns.statuses[campaign.status] ?? campaign.status}
+            />
+            {timing.label ? (
+              <span className="rounded-full bg-white/15 px-3 py-0.5 text-xs font-semibold backdrop-blur">
+                {timing.label}
+              </span>
             ) : null}
+          </div>
+          <h1
+            dir="auto"
+            className="mt-3 max-w-3xl text-start text-3xl font-bold leading-tight md:text-5xl"
+          >
+            {campaign.name}
+          </h1>
+          {campaign.description ? (
+            <p
+              dir="auto"
+              className="mt-4 max-w-2xl text-start text-base leading-relaxed text-brand-50 md:text-lg"
+            >
+              {campaign.description}
+            </p>
+          ) : null}
+          <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-brand-100">
+            <span className="inline-flex items-center gap-1.5">
+              {verified ? <ShieldCheckIcon className="size-4 text-brand-300" /> : null}
+              {dict.campaigns.organizedBy}{' '}
+              <Link
+                href={`/${locale}/organizations/${campaign.organization.slug}`}
+                className="font-semibold text-white underline-offset-4 hover:underline"
+              >
+                {campaign.organization.name}
+              </Link>
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <CalendarIcon className="size-4" />
+              {formatDate(campaign.startDate, locale)}
+              {campaign.endDate ? ` – ${formatDate(campaign.endDate, locale)}` : ''}
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <div className="mx-auto max-w-6xl px-4 py-10">
+        {/* Key figures — progress against the organizer's own targets. */}
+        <dl className="-mt-16 relative grid grid-cols-2 gap-3 md:grid-cols-4">
+          {[
+            {
+              icon: UsersIcon,
+              label: dict.campaigns.participants,
+              value: campaign._count.participants,
+            },
+            {
+              icon: CompassIcon,
+              label: dict.campaigns.initiatives,
+              value: campaign._count.opportunities,
+            },
+            {
+              icon: TargetIcon,
+              label: dict.campaigns.beneficiariesTarget,
+              value: campaign.beneficiaryTarget,
+            },
+            {
+              icon: HeartIcon,
+              label: dict.campaigns.raisedLabel,
+              value: funding.confirmedAmount,
+              suffix: ` ${funding.currency}`,
+            },
+          ].map(({ icon: Icon, label, value, suffix }) => (
+            <div key={label} className="rounded-card border border-sand-200 bg-white p-4 shadow-sm">
+              <dt className="flex items-center gap-2 text-xs font-medium text-sand-500">
+                <Icon className="size-4 text-brand-600" />
+                {label}
+              </dt>
+              <dd className="mt-2 text-2xl font-bold tabular-nums text-sand-900">
+                {value === null ? '—' : formatNumber(value, locale)}
+                {value !== null && suffix ? (
+                  <span className="text-sm font-semibold text-sand-500">{suffix}</span>
+                ) : null}
+              </dd>
+            </div>
+          ))}
+        </dl>
+
+        <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
+          {/* Main column */}
+          <div className="space-y-6 lg:col-span-2">
+            {/* How to take part — three numbered steps. */}
+            <Card className="p-6">
+              <h2 className="text-lg font-bold text-sand-900">{dict.campaigns.howToJoinTitle}</h2>
+              <ol className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
+                {dict.campaigns.howToJoinSteps.map((step, i) => {
+                  const Icon = HOW_ICONS[i] ?? HeartIcon;
+                  return (
+                    <li key={step.title} className="rounded-lg bg-brand-50/70 p-4">
+                      <span className="relative grid size-11 place-items-center rounded-full bg-brand-700 text-white">
+                        <Icon className="size-5" />
+                        <span className="absolute -top-1 -end-1 grid size-5 place-items-center rounded-full bg-clay-500 text-[11px] font-bold">
+                          {formatNumber(i + 1, locale)}
+                        </span>
+                      </span>
+                      <span className="mt-3 block font-semibold text-sand-900">{step.title}</span>
+                      <span className="mt-1 block text-sm leading-relaxed text-sand-600">
+                        {step.body}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ol>
+            </Card>
+
             {campaign.goal ? (
-              <div className="mt-4 border-t border-sand-100 pt-4">
-                <h3 className="text-sm font-semibold text-sand-800">
-                  {dict.workspace.campaigns.goalLabel}
-                </h3>
-                <p className="mt-1 whitespace-pre-line text-sand-700">{campaign.goal}</p>
-              </div>
+              <Card className="p-6">
+                <h2 className="text-lg font-bold text-sand-900">{dict.campaigns.aboutTitle}</h2>
+                <div className="mt-3 flex gap-3 rounded-lg border-s-4 border-clay-400 bg-clay-50 p-4">
+                  <TargetIcon className="mt-0.5 size-5 shrink-0 text-clay-600" />
+                  <div>
+                    <h3 className="text-sm font-semibold text-sand-800">
+                      {dict.workspace.campaigns.goalLabel}
+                    </h3>
+                    <p dir="auto" className="mt-1 whitespace-pre-line text-start text-sand-700">
+                      {campaign.goal}
+                    </p>
+                  </div>
+                </div>
+              </Card>
             ) : null}
-          </Card>
 
-          {/* Funding — honest bank-transfer totals; the platform records
-              pledges, the organization confirms them (no gateway, no refunds). */}
-          <Card className="p-6">
-            <h2 className="text-lg font-semibold text-sand-900">{dict.campaigns.fundingTitle}</h2>
-            <dl className="mt-3 grid gap-3 sm:grid-cols-3 text-sm">
-              <div className="rounded-lg bg-sand-50 p-3">
-                <dt className="text-sand-500">{dict.campaigns.raisedLabel}</dt>
-                <dd className="mt-1 text-lg font-semibold text-sand-900">
-                  {formatNumber(funding.confirmedAmount, locale)} {funding.currency}
-                  <span className="ms-2 text-xs font-normal text-sand-500">
-                    ({formatNumber(funding.confirmedCount, locale)})
-                  </span>
-                </dd>
+            {/* Related initiatives — the campaign's actual field actions. */}
+            <section>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <h2 className="text-lg font-bold text-sand-900">
+                  {dict.campaigns.relatedOpportunities}
+                </h2>
+                {related.length > 0 ? (
+                  <Link
+                    href={`/${locale}/opportunities?campaignId=${campaign.id}`}
+                    className="text-sm font-semibold text-brand-700 hover:text-brand-800"
+                  >
+                    {dict.common.viewAll}
+                  </Link>
+                ) : null}
               </div>
-              <div className="rounded-lg bg-sand-50 p-3">
-                <dt className="text-sand-500">{dict.campaigns.pendingLabel}</dt>
-                <dd className="mt-1 text-lg font-semibold text-sand-900">
-                  {formatNumber(funding.pendingAmount, locale)} {funding.currency}
-                  <span className="ms-2 text-xs font-normal text-sand-500">
-                    ({formatNumber(funding.pendingCount, locale)})
-                  </span>
-                </dd>
-              </div>
-              {funding.budget !== null ? (
-                <div className="rounded-lg bg-sand-50 p-3">
-                  <dt className="text-sand-500">{dict.workspace.campaigns.budgetLabel}</dt>
-                  <dd className="mt-1 text-lg font-semibold text-sand-900">
-                    {formatNumber(funding.budget, locale)} {funding.currency}
+              {related.length === 0 ? (
+                <Card className="mt-3 p-6 text-sm text-sand-500">
+                  {dict.campaigns.noRelatedOpportunities}
+                </Card>
+              ) : (
+                <ul className="mt-4 grid grid-cols-1 gap-5 sm:grid-cols-2">
+                  {related.map((item) => (
+                    <InitiativeCard key={item.id} locale={locale} dict={dict} item={item} />
+                  ))}
+                </ul>
+              )}
+            </section>
+          </div>
+
+          {/* Sidebar: progress, participation and funding actions. */}
+          <aside className="space-y-6">
+            <Card className="space-y-5 p-6">
+              <ProgressBar
+                label={dict.campaigns.volunteersProgress}
+                value={campaign._count.participants}
+                target={campaign.volunteerTarget}
+                locale={locale}
+                copy={dict.campaigns}
+              />
+              <ProgressBar
+                label={dict.campaigns.fundingProgress}
+                value={funding.confirmedAmount}
+                target={funding.budget}
+                locale={locale}
+                copy={dict.campaigns}
+                unit={funding.currency}
+                tone="clay"
+              />
+              <dl className="space-y-2 border-t border-sand-100 pt-4 text-sm">
+                {campaign.hourTarget !== null ? (
+                  <div className="flex justify-between gap-3">
+                    <dt className="text-sand-500">{dict.campaigns.hoursTarget}</dt>
+                    <dd className="font-semibold tabular-nums text-sand-800">
+                      {formatNumber(Number(campaign.hourTarget), locale)}
+                    </dd>
+                  </div>
+                ) : null}
+                <div className="flex justify-between gap-3">
+                  <dt className="text-sand-500">{dict.campaigns.pendingLabel}</dt>
+                  <dd className="font-semibold tabular-nums text-sand-800">
+                    {formatNumber(funding.pendingAmount, locale)} {funding.currency}
                   </dd>
                 </div>
-              ) : null}
-            </dl>
-            <p className="mt-3 text-xs text-sand-500">{dict.campaigns.bankTransferHint}</p>
-            <CampaignContribute
+              </dl>
+            </Card>
+
+            <CampaignParticipant
               locale={locale}
               campaignId={campaign.id}
               campaignStatus={campaign.status}
-              currency={funding.currency}
             />
-          </Card>
 
-          {/* Related opportunities — every published opportunity linked to
-              this campaign, with a "view all" deep link into the filter. */}
-          <Card className="p-6">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <h2 className="text-lg font-semibold text-sand-900">
-                {dict.campaigns.relatedOpportunities}
-              </h2>
-              <Link
-                href={`/${locale}/opportunities?campaignId=${campaign.id}`}
-                className="text-sm font-medium text-brand-700 hover:text-brand-800"
-              >
-                {dict.common.viewAll}
-              </Link>
-            </div>
-            {related.length === 0 ? (
-              <p className="mt-3 text-sm text-sand-500">{dict.campaigns.noRelatedOpportunities}</p>
-            ) : (
-              <ul className="mt-3 divide-y divide-sand-100">
-                {related.map((item) => (
-                  <li key={item.id} className="py-3">
-                    <Link
-                      href={`/${locale}/opportunities/${item.slug}`}
-                      className="flex min-h-11 items-center rounded-lg px-2 hover:bg-sand-50"
-                    >
-                      <p className="font-medium text-sand-900">{titleFor(item, locale)}</p>
-                      {locationLineFor(item, locale) ? (
-                        <p className="mt-0.5 text-sm text-sand-600">
-                          {locationLineFor(item, locale)}
-                        </p>
-                      ) : null}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </Card>
+            <Card className="p-6">
+              <h2 className="text-base font-bold text-sand-900">{dict.campaigns.fundingTitle}</h2>
+              <p className="mt-2 text-xs leading-relaxed text-sand-500">
+                {dict.campaigns.bankTransferHint}
+              </p>
+              <CampaignContribute
+                locale={locale}
+                campaignId={campaign.id}
+                campaignStatus={campaign.status}
+                currency={funding.currency}
+              />
+            </Card>
+          </aside>
         </div>
-
-        {/* Sidebar: dates, targets, participation */}
-        <aside className="space-y-6">
-          <Card className="p-6">
-            <dl className="space-y-3 text-sm">
-              <div className="flex justify-between gap-3">
-                <dt className="text-sand-500">{dict.common.startDate}</dt>
-                <dd className="font-medium text-sand-800">
-                  {formatDate(campaign.startDate, locale)}
-                </dd>
-              </div>
-              {campaign.endDate ? (
-                <div className="flex justify-between gap-3">
-                  <dt className="text-sand-500">{dict.common.endDate}</dt>
-                  <dd className="font-medium text-sand-800">
-                    {formatDate(campaign.endDate, locale)}
-                  </dd>
-                </div>
-              ) : null}
-              <div className="flex justify-between gap-3">
-                <dt className="text-sand-500">{dict.campaigns.participants}</dt>
-                <dd className="font-medium text-sand-800">{campaign._count.participants}</dd>
-              </div>
-              {campaign.volunteerTarget !== null ? (
-                <div className="flex justify-between gap-3">
-                  <dt className="text-sand-500">{dict.campaigns.volunteersTarget}</dt>
-                  <dd className="font-medium text-sand-800">{campaign.volunteerTarget}</dd>
-                </div>
-              ) : null}
-              {campaign.hourTarget !== null ? (
-                <div className="flex justify-between gap-3">
-                  <dt className="text-sand-500">{dict.campaigns.hoursTarget}</dt>
-                  <dd className="font-medium text-sand-800">{campaign.hourTarget}</dd>
-                </div>
-              ) : null}
-              {campaign.beneficiaryTarget !== null ? (
-                <div className="flex justify-between gap-3">
-                  <dt className="text-sand-500">{dict.campaigns.beneficiariesTarget}</dt>
-                  <dd className="font-medium text-sand-800">{campaign.beneficiaryTarget}</dd>
-                </div>
-              ) : null}
-            </dl>
-          </Card>
-
-          <CampaignParticipant
-            locale={locale}
-            campaignId={campaign.id}
-            campaignStatus={campaign.status}
-          />
-        </aside>
       </div>
-    </div>
+    </>
   );
 }

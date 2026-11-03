@@ -1094,7 +1094,7 @@ function SettingsSection({ locale, canManage }: { locale: LocaleCode; canManage:
         <Card>
           <CardTitle>{dict.dashboard.settingsTitle}</CardTitle>
           <form onSubmit={(event) => void saveSetting(event)} className="mt-3 space-y-3">
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <Input
                 label={dict.admin.settingsKeyLabel}
                 required
@@ -1297,7 +1297,7 @@ function FlagsSection({ locale, canManage }: { locale: LocaleCode; canManage: bo
         <Card>
           <CardTitle>{dict.dashboard.flagsTitle}</CardTitle>
           <form onSubmit={(event) => void saveFlag(event)} className="mt-3 space-y-3">
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <Input
                 label={dict.admin.settingsKeyLabel}
                 required

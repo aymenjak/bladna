@@ -294,6 +294,9 @@ export async function SiteFooter() {
             <Link href={`/${locale}/privacy`} className="hover:text-white">
               {dict.nav.privacy}
             </Link>
+            <Link href={`/${locale}/credits`} className="hover:text-white">
+              {dict.nav.credits}
+            </Link>
           </nav>
         </div>
       </div>

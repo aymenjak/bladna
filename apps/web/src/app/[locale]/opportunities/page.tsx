@@ -537,7 +537,7 @@ export default async function OpportunitiesPage({
             ) : null}
           </EmptyState>
         ) : (
-          <ul className="rise mt-4 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <ul className="rise mt-4 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {items.map((item) => (
               <InitiativeCard
                 key={item.id}

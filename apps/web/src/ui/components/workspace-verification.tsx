@@ -117,7 +117,7 @@ export function SubmitVerificationForm({
           <p className="mt-1 text-xs text-sand-500">
             {dict.workspace.verification.documentIdsHint}
           </p>
-          <ul className="mt-2 grid gap-2 sm:grid-cols-2">
+          <ul className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
             {documents.map((document) => (
               <li key={document.id}>
                 <label className="flex min-h-11 items-center gap-2 rounded-lg border border-sand-200 bg-sand-50 px-3 py-2 text-sm text-sand-700">

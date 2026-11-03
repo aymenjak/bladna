@@ -360,7 +360,9 @@ export default async function VolunteerProfilePage({
         {profile.bio ? (
           <Card className="mt-6 p-6">
             <h2 className="text-lg font-semibold text-sand-900">{dict.directory.profileAbout}</h2>
-            <p className="mt-3 text-sm text-sand-600">{profile.bio}</p>
+            <p dir="auto" className="mt-3 text-start text-sm text-sand-600">
+              {profile.bio}
+            </p>
           </Card>
         ) : null}
 

@@ -8,7 +8,9 @@ export const LOCALE_COOKIE = 'bladna_locale';
 
 const COMMON = {
   httpOnly: true,
-  secure: env.isProduction,
+  // Also Secure whenever the app is served over HTTPS (e.g. a tunnel in front of
+  // a non-production NODE_ENV) — browsers treat http://localhost as secure too.
+  secure: env.isProduction || env.appUrl.startsWith('https://'),
   sameSite: 'lax' as const,
   path: '/',
   ...(env.cookieDomain ? { domain: env.cookieDomain } : {}),

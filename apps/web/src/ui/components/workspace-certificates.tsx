@@ -92,7 +92,7 @@ export function IssueCertificateForm({
       <h2 className="text-base font-semibold text-sand-900">
         {dict.workspace.certificates.issueTitle}
       </h2>
-      <form onSubmit={submit} className="mt-4 grid gap-4 sm:grid-cols-2">
+      <form onSubmit={submit} className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="sm:col-span-2">
           <label htmlFor="cert-hour" className="block text-sm font-medium text-sand-700">
             {dict.workspace.certificates.fromHour}

@@ -9,6 +9,8 @@ import { internationalRoutes } from '@/server/modules/international';
 import type { Handler } from '@/server/http';
 import { invoke } from '@/server/ssr';
 import { ExperienceForm } from '@/ui/components/experience-form';
+import { cookies } from 'next/headers';
+import { ACCESS_COOKIE, REFRESH_COOKIE } from '@/server/cookies';
 import { BenefitGrid } from '@/ui/international/benefit-grid';
 import { EligibilityBox } from '@/ui/international/eligibility-box';
 import { ShareButtons } from '@/ui/international/share-buttons';
@@ -90,6 +92,8 @@ export default async function InternationalDetailPage({
   if (!isLocale(locale)) notFound();
   if (!isUuid(id)) notFound();
   const { dict } = getDictionary(locale);
+  const jar = await cookies();
+  const signedIn = jar.has(ACCESS_COOKIE) || jar.has(REFRESH_COOKIE);
 
   let offer: InternationalDetail;
   try {
@@ -156,7 +160,7 @@ export default async function InternationalDetailPage({
         </p>
       </header>
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-3">
+      <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Main column */}
         <div className="space-y-8 lg:col-span-2">
           {excerpt ? (
@@ -173,7 +177,10 @@ export default async function InternationalDetailPage({
               <h2 className="text-lg font-semibold text-sand-900">
                 {dict.international.eligibility}
               </h2>
-              <p className="mt-3 whitespace-pre-line leading-relaxed text-sand-700">
+              <p
+                dir="auto"
+                className="mt-3 whitespace-pre-line text-start leading-relaxed text-sand-700"
+              >
                 {offer.eligibility}
               </p>
             </Card>
@@ -188,40 +195,52 @@ export default async function InternationalDetailPage({
             <dl className="space-y-3 text-sm">
               <div className="flex justify-between gap-3">
                 <dt className="text-sand-500">{dict.international.program}</dt>
-                <dd className="font-medium text-sand-800">{offer.program}</dd>
+                <dd dir="auto" className="font-medium text-sand-800">
+                  {offer.program}
+                </dd>
               </div>
               <div className="flex justify-between gap-3">
                 <dt className="text-sand-500">{dict.international.provider}</dt>
-                <dd className="font-medium text-sand-800">{offer.provider}</dd>
+                <dd dir="auto" className="font-medium text-sand-800">
+                  {offer.provider}
+                </dd>
               </div>
               {categoryLabel ? (
                 <div className="flex justify-between gap-3">
                   <dt className="text-sand-500">{dict.international.filtersCategory}</dt>
-                  <dd className="font-medium text-sand-800">{categoryLabel}</dd>
+                  <dd dir="auto" className="font-medium text-sand-800">
+                    {categoryLabel}
+                  </dd>
                 </div>
               ) : null}
               {offer.city ? (
                 <div className="flex justify-between gap-3">
                   <dt className="text-sand-500">{dict.international.cityLabel}</dt>
-                  <dd className="font-medium text-sand-800">{offer.city}</dd>
+                  <dd dir="auto" className="font-medium text-sand-800">
+                    {offer.city}
+                  </dd>
                 </div>
               ) : null}
               {offer.region ? (
                 <div className="flex justify-between gap-3">
                   <dt className="text-sand-500">{dict.international.regionLabel}</dt>
-                  <dd className="font-medium text-sand-800">{offer.region}</dd>
+                  <dd dir="auto" className="font-medium text-sand-800">
+                    {offer.region}
+                  </dd>
                 </div>
               ) : null}
               {offer.duration ? (
                 <div className="flex justify-between gap-3">
                   <dt className="text-sand-500">{dict.international.duration}</dt>
-                  <dd className="font-medium text-sand-800">{offer.duration}</dd>
+                  <dd dir="auto" className="font-medium text-sand-800">
+                    {offer.duration}
+                  </dd>
                 </div>
               ) : null}
               {offer.startDate ? (
                 <div className="flex justify-between gap-3">
                   <dt className="text-sand-500">{dict.international.startDateLabel}</dt>
-                  <dd className="font-medium text-sand-800">
+                  <dd dir="auto" className="font-medium text-sand-800">
                     {formatDate(offer.startDate, locale)}
                   </dd>
                 </div>
@@ -229,13 +248,15 @@ export default async function InternationalDetailPage({
               {offer.endDate ? (
                 <div className="flex justify-between gap-3">
                   <dt className="text-sand-500">{dict.international.endDateLabel}</dt>
-                  <dd className="font-medium text-sand-800">{formatDate(offer.endDate, locale)}</dd>
+                  <dd dir="auto" className="font-medium text-sand-800">
+                    {formatDate(offer.endDate, locale)}
+                  </dd>
                 </div>
               ) : null}
               {offer.deadline ? (
                 <div className="flex justify-between gap-3">
                   <dt className="text-sand-500">{dict.international.deadlineLabel}</dt>
-                  <dd className="font-medium text-sand-800">
+                  <dd dir="auto" className="font-medium text-sand-800">
                     {formatDate(offer.deadline, locale)}
                   </dd>
                 </div>
@@ -243,19 +264,23 @@ export default async function InternationalDetailPage({
               {ageRange ? (
                 <div className="flex justify-between gap-3">
                   <dt className="text-sand-500">{dict.international.ageRangeLabel}</dt>
-                  <dd className="font-medium text-sand-800">{ageRange}</dd>
+                  <dd dir="auto" className="font-medium text-sand-800">
+                    {ageRange}
+                  </dd>
                 </div>
               ) : null}
               {offer.skills ? (
                 <div className="flex justify-between gap-3">
                   <dt className="text-sand-500">{dict.international.skillsLabel}</dt>
-                  <dd className="text-end font-medium text-sand-800">{offer.skills}</dd>
+                  <dd dir="auto" className="ltr:text-right rtl:text-left font-medium text-sand-800">
+                    {offer.skills}
+                  </dd>
                 </div>
               ) : null}
               {offer.languageRequirements ? (
                 <div className="flex justify-between gap-3">
                   <dt className="text-sand-500">{dict.international.languagesLabel}</dt>
-                  <dd className="text-end font-medium text-sand-800">
+                  <dd dir="auto" className="ltr:text-right rtl:text-left font-medium text-sand-800">
                     {offer.languageRequirements}
                   </dd>
                 </div>
@@ -263,7 +288,9 @@ export default async function InternationalDetailPage({
               {offer.ageRequirements ? (
                 <div className="flex justify-between gap-3">
                   <dt className="text-sand-500">{dict.international.requirementsLabel}</dt>
-                  <dd className="text-end font-medium text-sand-800">{offer.ageRequirements}</dd>
+                  <dd dir="auto" className="ltr:text-right rtl:text-left font-medium text-sand-800">
+                    {offer.ageRequirements}
+                  </dd>
                 </div>
               ) : null}
             </dl>
@@ -316,10 +343,14 @@ export default async function InternationalDetailPage({
         </aside>
       </div>
 
-      {/* Self-declared experience sharing + the caller's own submissions. */}
-      <div className="mt-10">
-        <ExperienceForm locale={locale} />
-      </div>
+      {/* Self-declared experience sharing + the caller's own submissions —
+          signed-in volunteers only (the form reads /international/experiences,
+          which needs a session; visitors already get the sign-in card above). */}
+      {signedIn ? (
+        <div className="mt-10">
+          <ExperienceForm locale={locale} />
+        </div>
+      ) : null}
     </div>
   );
 }

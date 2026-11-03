@@ -90,6 +90,7 @@ const PUBLIC_PAGES = [
   { name: 'verify/certificate', path: './[locale]/verify/certificate/page.tsx' },
   { name: 'terms', path: './[locale]/terms/page.tsx' },
   { name: 'privacy', path: './[locale]/privacy/page.tsx' },
+  { name: 'credits', path: './[locale]/credits/page.tsx' },
   { name: 'help', path: './[locale]/help/page.tsx' },
   { name: 'help/[slug]', path: './[locale]/help/[slug]/page.tsx' },
 ];

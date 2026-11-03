@@ -332,7 +332,7 @@ export function VerificationSection({ locale }: { locale: LocaleCode }) {
             </Button>
           </div>
 
-          <dl className="mt-3 grid gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
+          <dl className="mt-3 grid grid-cols-1 gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
             <div>
               <dt className="text-sand-500">{dict.admin.columns.organization}</dt>
               <dd className="font-medium text-sand-900">{detail.organization.name}</dd>
@@ -491,7 +491,7 @@ function DecideForm({
       onSubmit={(event) => void submit(event)}
       className="mt-4 space-y-3 rounded-lg border border-sand-200 bg-sand-50 p-4"
     >
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <Select
           label={dict.admin.columns.decision}
           value={decision}

@@ -572,7 +572,7 @@ export function InitiativeConsole({
                 <h4 className="text-sm font-semibold text-sand-900">
                   {dict.opportunity.problemTitle}
                 </h4>
-                <div className="grid gap-3 sm:grid-cols-3">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                   <Textarea
                     label={dict.workspace.opportunities.form.labelAr}
                     value={narrative.problemAr}
@@ -602,7 +602,7 @@ export function InitiativeConsole({
                 <h4 className="text-sm font-semibold text-sand-900">
                   {dict.opportunity.objectiveTitle}
                 </h4>
-                <div className="grid gap-3 sm:grid-cols-3">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                   <Textarea
                     label={dict.workspace.opportunities.form.labelAr}
                     value={narrative.objectiveAr}
@@ -640,7 +640,7 @@ export function InitiativeConsole({
                   }
                 />
 
-                <div className="grid gap-3 sm:grid-cols-3">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                   <Input
                     label={c.contactNameLabel}
                     value={narrative.contactName}
@@ -778,7 +778,7 @@ export function InitiativeConsole({
                   noValidate
                 >
                   <h4 className="text-sm font-semibold text-sand-900">{c.addNeed}</h4>
-                  <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <label className="block text-sm font-medium text-sand-700">
                       {c.needKind}
                       <select
@@ -800,7 +800,7 @@ export function InitiativeConsole({
                       onChange={(event) => setNeedDescription(event.target.value)}
                     />
                   </div>
-                  <div className="grid gap-3 sm:grid-cols-3">
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                     <Input
                       label={dict.workspace.opportunities.form.labelAr}
                       required
@@ -823,7 +823,7 @@ export function InitiativeConsole({
                       onChange={(event) => setNeedLabelEn(event.target.value)}
                     />
                   </div>
-                  <div className="grid gap-3 sm:grid-cols-3">
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                     {needKind === 'FINANCIAL' ? (
                       <>
                         <Input
@@ -870,7 +870,7 @@ export function InitiativeConsole({
                 ) : (
                   <>
                     {/* Headline counts, colour-coded per status. */}
-                    <div className="grid gap-3 sm:grid-cols-3">
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                       <div className="rounded-lg border border-sand-200 p-4">
                         <p className="text-xs text-sand-500">{c.offersTotal}</p>
                         <p className="mt-0.5 text-2xl font-semibold tabular-nums text-sand-900">
@@ -1125,7 +1125,7 @@ export function InitiativeConsole({
                   noValidate
                 >
                   <h4 className="text-sm font-semibold text-sand-900">{c.addMetric}</h4>
-                  <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <label className="block text-sm font-medium text-sand-700">
                       {c.metricType}
                       <select
@@ -1148,7 +1148,7 @@ export function InitiativeConsole({
                       onChange={(event) => setMetricName(event.target.value)}
                     />
                   </div>
-                  <div className="grid gap-3 sm:grid-cols-3">
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                     <Input
                       label={c.metricActual}
                       type="number"

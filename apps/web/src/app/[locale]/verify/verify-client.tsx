@@ -91,7 +91,7 @@ export function VerifyClient({
           </span>
           <input
             data-testid="verify-code"
-            className="mt-1 w-full rounded-lg border border-sand-200 bg-white px-4 py-3 font-mono text-sand-900 placeholder:text-sand-400 focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-100"
+            className="mt-1 w-full rounded-lg border border-sand-200 bg-white px-4 py-3 font-mono text-sand-900 placeholder:font-sans placeholder:text-sand-400 focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-100"
             value={code}
             onChange={(event) => setCode(event.target.value)}
             placeholder={kind ? dict.verify.kinds[kind].placeholder : dict.verify.codePlaceholder}

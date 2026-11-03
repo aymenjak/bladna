@@ -24,6 +24,7 @@ import { generateOpaqueSecret, passwordHasher } from '@bladna/auth';
 import { parseVolunteerIdFormat, renderVolunteerId } from '@bladna/domain';
 import { getPrisma, type Opportunity } from './index';
 import { DEMO_PASSWORD } from './demo-accounts';
+import { seedRichDemo } from './seed-rich';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Guard & constants
@@ -998,7 +999,7 @@ async function main(): Promise<void> {
     await prisma.setting.upsert({
       where: { key: 'volunteerId.format' },
       update: {},
-      create: { key: 'volunteerId.format', value: '{PREFIX}-{REGION}-{SEQ:6}' },
+      create: { key: 'volunteerId.format', value: '{BLD}-{ALG}-{SEQ:6}' },
     });
 
     // ── Users ──────────────────────────────────────────────────────────────
@@ -1046,7 +1047,7 @@ async function main(): Promise<void> {
         name: 'Association Atlas Verts',
         slug: 'atlas-verts',
         organizationType: 'ASSOCIATION',
-        description: 'Environmental association based in Algiers (demo dataset).',
+        description: 'Environmental association based in Algiers.',
         // Presentation (public): a cover band + logo on the profile page —
         // original SVG mark, CC0 photo from the P11 batch.
         logo: '/photos/logo-atlas-verts.svg',
@@ -1095,7 +1096,7 @@ async function main(): Promise<void> {
 
     // ── Demo conversation (org ↔ volunteer) — /messages opens on a real
     // thread instead of an empty list (P17). Guarded by the subject. ──────
-    const demoSubject = 'Winter campaign volunteers (demo)';
+    const demoSubject = 'Winter campaign volunteers';
     const existingConversation = await prisma.conversation.findFirst({
       where: { subject: demoSubject },
     });
@@ -1163,7 +1164,7 @@ async function main(): Promise<void> {
           userId: volunteer.id,
           volunteerId: renderVolunteerId(format, counter.value),
           publicToken: generateOpaqueSecret(24),
-          bio: 'Volunteer based in Algiers — environment and community actions (demo profile).',
+          bio: 'Volunteer based in Algiers — environment and community actions.',
           wilayaId: must(wilayaIds.get('16'), 'wilaya 16'),
           cityId: must(cityIds.get('16'), 'city Algiers'),
           availability: ['WEEKENDS', 'EVENINGS', 'FLEXIBLE'],
@@ -1318,12 +1319,12 @@ async function main(): Promise<void> {
           opportunityId: parkCleanup.id,
           volunteerProfileId: profile.id,
           status: 'ACCEPTED',
-          motivation: 'I would like to help keep public spaces clean and green (demo application).',
+          motivation: 'I would like to help keep public spaces clean and green.',
           availability: 'Weekends',
           submittedAt: new Date('2026-09-10T10:00:00.000Z'),
           reviewedAt: new Date('2026-09-11T11:00:00.000Z'),
           reviewedById: orgOwner.id,
-          decisionNote: 'Accepted (demo dataset).',
+          decisionNote: 'Accepted.',
         },
       });
     }
@@ -1345,7 +1346,7 @@ async function main(): Promise<void> {
           opportunityId: parkCleanup.id,
           authorId: volunteer.id,
           rating: 5,
-          body: 'Well organized and welcoming: the team briefed us clearly, tools were ready and the park looked great by the end of the morning. (demo review)',
+          body: 'Well organized and welcoming: the team briefed us clearly, tools were ready and the park looked great by the end of the morning.',
           source: 'PARTICIPANT',
           // Same instant for both stamps — the row was written once, so the UI
           // must never flag it as "edited" (see reviews-section.tsx).
@@ -1369,7 +1370,7 @@ async function main(): Promise<void> {
           organizationId: organization.id,
           opportunityId: beachCleanup.id,
           title: 'Sidi Fredj beach clean-up',
-          description: 'Coastal litter collection and sorting (demo activity).',
+          description: 'Coastal litter collection and sorting.',
           startedAt: new Date('2026-09-15T09:00:00.000Z'),
           endedAt: new Date('2026-09-15T13:00:00.000Z'),
           status: 'COMPLETED',
@@ -1432,7 +1433,7 @@ async function main(): Promise<void> {
           activityId: activity.id,
           opportunityId: beachCleanup.id,
           title: 'Sidi Fredj beach clean-up — volunteer certificate',
-          description: '4 hours of verified coastal clean-up service (demo dataset).',
+          description: '4 hours of verified coastal clean-up service.',
           hours: 4,
           certificateNumber: nextCertificateNumber(),
           verificationToken: generateOpaqueSecret(24),
@@ -1466,11 +1467,11 @@ async function main(): Promise<void> {
       update: {},
       create: {
         organizationId: organization.id,
-        name: 'Winter Solidarity 2026',
+        name: 'قوافل الشتاء — Winter Solidarity 2026',
         slug: 'winter-solidarity-2026',
         description:
-          'Warm kits and food parcels for families across Algiers province (demo campaign).',
-        goal: 'Deliver 500 winter kits to families across Algiers province.',
+          'قوافل تضامنية تحمل أغطية وقففًا غذائية إلى العائلات المعوزة في ولاية الجزائر خلال فصل الشتاء.',
+        goal: 'إيصال 500 قفة شتوية إلى العائلات في ولاية الجزائر.',
         startDate: new Date('2026-12-01T00:00:00.000Z'),
         endDate: new Date('2027-01-31T23:59:59.000Z'),
         status: 'ACTIVE',
@@ -1479,6 +1480,7 @@ async function main(): Promise<void> {
         beneficiaryTarget: 500,
         budget: 1500000,
         currency: 'DZD',
+        coverImage: '/photos/op-bakery.jpg',
       },
     });
 
@@ -1583,8 +1585,7 @@ async function main(): Promise<void> {
       labelAr: 'قفازات وأكياس نفايات',
       labelFr: 'Gants et sacs de collecte',
       labelEn: 'Gloves and waste bags',
-      description:
-        '40 pairs of heavy-duty gloves and 40 collection bags for the clean-up teams (demo dataset).',
+      description: '40 pairs of heavy-duty gloves and 40 collection bags for the clean-up teams.',
       quantity: 40,
       fulfilled: 40,
       sortOrder: 1,
@@ -1594,7 +1595,7 @@ async function main(): Promise<void> {
       labelAr: 'حاويات للفرز المصدري',
       labelFr: 'Bacs de tri à la source',
       labelEn: 'Source-sorting bins',
-      description: 'Six bins installed on site so waste is sorted at source (demo dataset).',
+      description: 'Six bins installed on site so waste is sorted at source.',
       quantity: 6,
       fulfilled: 0,
       sortOrder: 2,
@@ -1605,7 +1606,7 @@ async function main(): Promise<void> {
       labelFr: "Location d'un camion pour le transport",
       labelEn: 'Truck rental for waste transport',
       description:
-        'Rental of a truck to carry the collected waste to the sorting centre; paid by bank transfer to the association, outside the platform (demo dataset).',
+        'Rental of a truck to carry the collected waste to the sorting centre; paid by bank transfer to the association, outside the platform.',
       targetAmount: 60000,
       sortOrder: 3,
     });
@@ -1614,8 +1615,7 @@ async function main(): Promise<void> {
       labelAr: 'غسيل وتعقيم بالضغط العالي',
       labelFr: 'Nettoyage haute pression',
       labelEn: 'High-pressure cleaning service',
-      description:
-        'One high-pressure washing session on the paths after the collection (demo dataset).',
+      description: 'One high-pressure washing session on the paths after the collection.',
       quantity: 1,
       fulfilled: 0,
       sortOrder: 4,
@@ -1625,7 +1625,7 @@ async function main(): Promise<void> {
     // console has a live decision to take. Pledges are recorded only — money
     // moves bank → organization outside the platform.
     await ensureOffer(equipmentNeedId, volunteer.id, {
-      description: '40 pairs of gloves and 40 bags from the volunteer centre stock (demo pledge).',
+      description: '40 pairs of gloves and 40 bags from the volunteer centre stock.',
       quantity: 40,
       status: 'ACCEPTED',
       contactNote: 'Delivered to the association office, Hydra.',
@@ -1634,7 +1634,7 @@ async function main(): Promise<void> {
     });
     await ensureOffer(financialNeedId, volunteer.id, {
       description:
-        '20,000 DZD pledged for the transport truck - bank transfer to the association account (demo pledge).',
+        '20,000 DZD pledged for the transport truck - bank transfer to the association account.',
       amount: 20000,
       status: 'ACCEPTED',
       contactNote: 'Transfer reference shared with the association by email.',
@@ -1642,7 +1642,7 @@ async function main(): Promise<void> {
       decidedAt: new Date('2026-09-23T11:00:00.000Z'),
     });
     await ensureOffer(materialNeedId, volunteer.id, {
-      description: 'Two sorting bins available from a neighbourhood depot (demo pledge).',
+      description: 'Two sorting bins available from a neighbourhood depot.',
       quantity: 2,
       contactNote: 'Available on weekends; needs pickup.',
     });
@@ -1655,21 +1655,21 @@ async function main(): Promise<void> {
       name: 'Volunteers mobilized',
       actual: 1,
       unit: 'volunteers',
-      source: 'Verified attendance records (demo dataset)',
+      source: 'Verified attendance records',
     });
     await ensureMetric(beachCleanup.id, {
       metricType: 'HOURS',
       name: 'Volunteer hours served',
       actual: 4,
       unit: 'hours',
-      source: 'Verified attendance records (demo dataset)',
+      source: 'Verified attendance records',
     });
     await ensureMetric(beachCleanup.id, {
       metricType: 'BENEFICIARIES',
       name: 'Residents benefiting from the clean shore',
       actual: 120,
       unit: 'people',
-      source: 'Organizer estimate (demo dataset)',
+      source: 'Organizer estimate',
     });
     await ensureMetric(parkCleanup.id, {
       metricType: 'VOLUNTEERS',
@@ -1677,7 +1677,7 @@ async function main(): Promise<void> {
       target: 25,
       actual: 1,
       unit: 'volunteers',
-      source: 'Registration records (demo dataset)',
+      source: 'Registration records',
     });
     await ensureMetric(parkCleanup.id, {
       metricType: 'ACTIVITIES',
@@ -1685,7 +1685,7 @@ async function main(): Promise<void> {
       target: 8,
       actual: 0,
       unit: 'stations',
-      source: 'Activity plan (demo dataset)',
+      source: 'Activity plan',
     });
     await ensureMetric(treePlanting.id, {
       metricType: 'TREES',
@@ -1693,7 +1693,7 @@ async function main(): Promise<void> {
       target: 120,
       actual: 0,
       unit: 'trees',
-      source: 'Planting plan (demo dataset)',
+      source: 'Planting plan',
     });
     await ensureMetric(treePlanting.id, {
       metricType: 'VOLUNTEERS',
@@ -1701,7 +1701,7 @@ async function main(): Promise<void> {
       target: 40,
       actual: 0,
       unit: 'volunteers',
-      source: 'Registration records (demo dataset)',
+      source: 'Registration records',
     });
 
     // ── Public content pages, announcement, featured placements (P12) ───────
@@ -1745,6 +1745,22 @@ async function main(): Promise<void> {
     await ensurePlacement('HOME_FEATURED_ORGANIZATIONS', 'ORGANIZATION', organization.id, 1);
     await ensurePlacement('HOME_CAMPAIGNS', 'CAMPAIGN', winterCampaign.id, 1);
     await ensurePlacement('DISCOVER_FEATURED', 'OPPORTUNITY', parkCleanup.id, 1);
+
+    // ── Rich showcase dataset (organizations, volunteers, initiatives across
+    // the wilayas) — create-once, see seed-rich.ts.
+    await seedRichDemo({
+      prisma,
+      countryId: country.id,
+      wilayaIds,
+      cityIds,
+      categoryIds,
+      skillIds,
+      languageIds,
+      interestIds,
+      passwordHash: await passwordHasher.hash(DEMO_PASSWORD),
+      policyVersion: POLICY_VERSION,
+      demoVolunteer: { userId: volunteer.id, profileId: profile.id },
+    });
 
     console.log('[seed] demo data ready.');
     console.log(`  password (all demo accounts): ${DEMO_PASSWORD}`);

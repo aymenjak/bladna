@@ -58,7 +58,7 @@ const PUBLIC_CACHE_CONTROL = 'public, max-age=60, s-maxage=60, stale-while-reval
 
 /** Locale-relative paths whose ANONYMOUS HTML may be cached briefly. */
 const PUBLIC_CACHE_PREFIXES = ['/opportunities', '/organizations', '/campaigns', '/verify'];
-const PUBLIC_CACHE_EXACT = ['/', '/map', '/safety', '/terms', '/privacy'];
+const PUBLIC_CACHE_EXACT = ['/', '/map', '/safety', '/terms', '/privacy', '/credits'];
 /**
  * Hard exclusion, checked before the allow-list: the auth flows must never be
  * shared-cacheable even if someone later widens the allow-list above. They are

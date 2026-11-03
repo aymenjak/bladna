@@ -252,7 +252,7 @@ export function ProfileSkillset({
             autoComplete="off"
           />
 
-          <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
             <Select
               label={dict.profile.skillsGroup}
               value={skillPick}
@@ -278,7 +278,7 @@ export function ProfileSkillset({
             </Button>
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-[1fr_auto_auto] sm:items-end">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto_auto] sm:items-end">
             <Select
               label={dict.profile.languagesGroup}
               value={languagePick}
@@ -316,7 +316,7 @@ export function ProfileSkillset({
             </Button>
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
             <Select
               label={dict.profile.interestsGroup}
               value={interestPick}

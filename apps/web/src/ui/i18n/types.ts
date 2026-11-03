@@ -78,6 +78,8 @@ export interface Dictionary {
     help: string;
     terms: string;
     privacy: string;
+    /** Footer link to the photo credits page (CC BY / BY-SA attribution). */
+    credits: string;
   };
   landing: {
     heroTitle: string;
@@ -136,6 +138,26 @@ export interface Dictionary {
       steps: Array<{ title: string; body: string }>;
       /** The outcome of the path, rendered as the closing cell. */
       trust: { title: string; body: string };
+    };
+    /** "Start here" infographic under the hero: pick a role, see the path
+        as four illustrated steps with one live figure and one action. */
+    startHere: {
+      eyebrow: string;
+      title: string;
+      body: string;
+      /** Accessible name of the role tab list. */
+      rolesLabel: string;
+      roles: Array<{
+        key: 'volunteer' | 'organization' | 'verifier';
+        label: string;
+        tagline: string;
+        steps: Array<{ title: string; body: string }>;
+        /** Follows a live count from persisted rows, e.g. "3 initiatives open now". */
+        liveLabel: string;
+        cta: string;
+        /** Locale-relative path, e.g. '/register'. */
+        href: string;
+      }>;
     };
     pillarsTitle: string;
     pillars: {
@@ -747,6 +769,26 @@ export interface Dictionary {
     cancelContribution: string;
     contributionCancelled: string;
     bankTransferHint: string;
+    /** "What is a campaign?" explainer on the list page (3 steps). */
+    explainerTitle: string;
+    explainerSteps: Array<{ title: string; body: string }>;
+    /** Card / hero helpers. */
+    viewDetails: string;
+    organizedBy: string;
+    /** `{n}` = number of days. */
+    daysLeft: string;
+    startsIn: string;
+    endsToday: string;
+    ended: string;
+    /** `{value}` of `{target}`. */
+    progressOf: string;
+    initiatives: string;
+    volunteersProgress: string;
+    fundingProgress: string;
+    /** Detail page: how to take part (3 steps). */
+    howToJoinTitle: string;
+    howToJoinSteps: Array<{ title: string; body: string }>;
+    activeCount: string;
     contributionStatuses: Record<ContributionStatus, string>;
     statuses: Record<CampaignStatus, string>;
   };
@@ -1723,6 +1765,14 @@ export interface Dictionary {
       intro: string;
       updated: string;
       sections: LegalSection[];
+    };
+    /** Photo credits page — attribution required by the CC BY / BY-SA photos. */
+    credits: {
+      title: string;
+      intro: string;
+      author: string;
+      license: string;
+      source: string;
     };
   };
   errors: {

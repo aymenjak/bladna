@@ -147,7 +147,7 @@ export function ApplyFormIntl({
           onChange={(event) => setMotivationLetter(event.target.value)}
           error={errors.motivationLetter}
         />
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Input
             label={dict.international.applyLanguages}
             maxLength={200}

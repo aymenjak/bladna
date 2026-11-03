@@ -250,7 +250,7 @@ function OverviewSection({
         </div>
       ) : (
         <>
-          <dl className="mt-4 grid gap-4 sm:grid-cols-3">
+          <dl className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div className="rounded-lg border border-sand-100 bg-sand-50 px-4 py-3">
               <dt className="text-xs font-semibold uppercase tracking-wide text-sand-500">
                 {overview.statSponsorships}
@@ -380,7 +380,7 @@ function ProfileSection({
         {error ? <ErrorAlert message={error} /> : null}
         {notice ? <SuccessNotice message={notice} /> : null}
 
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Input
             label={dict.admin.sponsorAdmin.legalName}
             required
@@ -613,7 +613,7 @@ function SponsorshipsSection({
           className="mt-4 space-y-4 rounded-lg border border-sand-200 bg-sand-50 p-4"
         >
           <p className="text-sm font-semibold text-sand-800">{copy.createTitle}</p>
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Input
               label={copy.amountLabel}
               type="number"
@@ -890,7 +890,7 @@ function ProgramForm({
         {initial ? copy.editTitle : copy.createTitle}
       </p>
       {error ? <ErrorAlert message={error} /> : null}
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Input
           label={copy.titleLabel}
           required

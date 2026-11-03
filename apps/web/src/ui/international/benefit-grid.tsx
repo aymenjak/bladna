@@ -35,7 +35,7 @@ export function BenefitGrid({
   return (
     <Card className="p-6">
       <h2 className="text-lg font-semibold text-sand-900">{dict.international.benefitsTitle}</h2>
-      <dl className="mt-3 grid gap-2 sm:grid-cols-2">
+      <dl className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
         {rows.map(([label, value]) => (
           <div
             key={label}

@@ -23,6 +23,7 @@ import { InitiativeCard } from '@/ui/components/initiative-card';
 import { HeroArt } from '@/ui/components/hero-art';
 import { HeroSlider } from '@/ui/components/hero-slider';
 import { StatCounter } from '@/ui/components/stat-counter';
+import { StartHere } from '@/ui/components/start-here';
 import {
   ArrowRightIcon,
   AwardIcon,
@@ -88,6 +89,7 @@ interface ImpactTotalsResult {
     activeOrganizations: number;
     registeredVolunteers: number;
     verifiedHours: number;
+    validCertificates: number;
   };
 }
 
@@ -264,7 +266,7 @@ function InitiativeSection({
           </Link>
         </EmptyState>
       ) : (
-        <ul className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {items.map((item) => (
             <InitiativeCard key={item.id} locale={locale} dict={dict} item={item} titleAs="h3" />
           ))}
@@ -411,7 +413,7 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
         {/* P26: the P11 dunes retire from the hero — the photo slider carries
             the landscape now — and keep the final CTA as the bookend. */}
         <div className="relative mx-auto max-w-6xl px-4 py-16 md:py-20">
-          <div className="grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr]">
+          <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-[1.05fr_0.95fr]">
             <div>
               <h1
                 className="hero-rise max-w-2xl bg-gradient-to-b from-white to-brand-200 bg-clip-text text-4xl font-bold leading-[1.14] text-balance text-transparent md:text-6xl"
@@ -527,6 +529,30 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
         </div>
       </section>
 
+      {/* "Start here" infographic — the first thing under the hero: pick a
+          role, see the path as four illustrated steps, one live figure from
+          persisted rows (same /impact totals as the band below), one action. */}
+      <section aria-labelledby="start-here-title" className="bg-sand-50">
+        <div className="mx-auto max-w-6xl px-4 py-14">
+          <p className="text-sm font-semibold text-clay-600">{dict.landing.startHere.eyebrow}</p>
+          <h2 id="start-here-title" className="mt-1 text-3xl font-bold text-sand-900 md:text-4xl">
+            {dict.landing.startHere.title}
+          </h2>
+          <p className="mt-2 text-sand-600">{dict.landing.startHere.body}</p>
+          <div className="mt-8">
+            <StartHere
+              copy={dict.landing.startHere}
+              locale={locale}
+              liveCounts={{
+                volunteer: impact.totals.publishedOpportunities,
+                organization: impact.totals.activeOrganizations,
+                verifier: impact.totals.validCertificates,
+              }}
+            />
+          </div>
+        </div>
+      </section>
+
       {/* Discovery launcher — quick chips + browse-by-cause in one block.
           P22: pb added here — the journey band below turned white and owns
           its own padding, so this card needs the breathing room itself. */}
@@ -576,7 +602,7 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
           <p className="mt-3 max-w-3xl text-sm leading-relaxed text-sand-600 sm:text-base">
             {dict.landing.journey.body}
           </p>
-          <ol className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <ol className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {dict.landing.journey.steps.map((step, index) => (
               <li
                 key={step.title}
@@ -626,7 +652,7 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
             <p className="mt-3 max-w-2xl text-sm leading-relaxed text-sand-600">
               {dict.featured.body}
             </p>
-            <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <ul className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {featuredItems.map((item) => {
                 const meta = featuredMeta(locale, item);
                 return (
@@ -663,7 +689,7 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
           priority (P22: one dominant dark cell, never two). */}
       <section data-reveal className="mx-auto max-w-6xl px-4 py-16">
         <SectionHeading eyebrow={dict.landing.eyebrows.pillars} title={dict.landing.pillarsTitle} />
-        <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {pillarEntries.map(([key, pillar], index) => {
             const featured = index === 0;
             return (
@@ -709,7 +735,7 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
       <section data-reveal className="bg-white">
         <div className="mx-auto max-w-6xl px-4 py-16">
           <SectionHeading eyebrow={dict.landing.eyebrows.how} title={dict.landing.howTitle} />
-          <ol className="mt-8 grid gap-5 md:grid-cols-3">
+          <ol className="mt-8 grid grid-cols-1 gap-5 md:grid-cols-3">
             {dict.landing.how.map((step, index) => (
               <li
                 key={step}
@@ -770,7 +796,7 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
             title={dict.landing.statsTitle}
           />
           <p className="mt-2 text-sm text-brand-200">{dict.landing.statsNote}</p>
-          <dl className="mt-8 grid gap-px overflow-hidden rounded-card border border-white/15 bg-white/15 sm:grid-cols-2 lg:grid-cols-4">
+          <dl className="mt-8 grid grid-cols-1 gap-px overflow-hidden rounded-card border border-white/15 bg-white/15 sm:grid-cols-2 lg:grid-cols-4">
             {statRows.map(([label, value]) => (
               <div key={label} className="bg-brand-900/80 px-5 py-7 backdrop-blur-sm">
                 <dd className="text-5xl font-bold tabular-nums md:text-6xl">
@@ -795,7 +821,7 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
             eyebrow={dict.landing.eyebrows.services}
             title={dict.landing.servicesTitle}
           />
-          <ul className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <ul className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {serviceCards.map((card) => (
               <li key={card.key}>
                 <Card

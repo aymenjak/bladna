@@ -274,7 +274,7 @@ export default async function InternationalPage({
             {recommendations.length === 0 ? (
               <p className="mt-2 text-sm text-sand-600">{dict.international.recommendedEmpty}</p>
             ) : (
-              <ul className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <ul className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {recommendations.map(({ opportunity, reasons }) => {
                   const reasonLabels = reasons
                     .map((reason) => recommendationReasonLabel(dict, reason))
@@ -312,7 +312,7 @@ export default async function InternationalPage({
         {items.length === 0 ? (
           <EmptyState className="mt-12">{dict.international.empty}</EmptyState>
         ) : (
-          <ul className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <ul className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {items.map((item) => (
               <OpportunityCardIntl key={item.id} locale={locale} item={item} />
             ))}

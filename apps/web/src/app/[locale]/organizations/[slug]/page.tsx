@@ -256,7 +256,7 @@ export default async function OrganizationDetailPage({
           ]}
         />
 
-        <div className="mt-6 grid gap-6 lg:grid-cols-3">
+        <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
           {/* Main column */}
           <div className="space-y-8 lg:col-span-2">
             {row.description ? (
@@ -287,7 +287,7 @@ export default async function OrganizationDetailPage({
               {opportunities.length === 0 ? (
                 <EmptyState className="mt-3">{dict.organizations.noOpportunities}</EmptyState>
               ) : (
-                <ul className="mt-4 grid gap-5 sm:grid-cols-2">
+                <ul className="mt-4 grid grid-cols-1 gap-5 sm:grid-cols-2">
                   {opportunities.map((item) => (
                     <InitiativeCard
                       key={item.id}
@@ -317,7 +317,7 @@ export default async function OrganizationDetailPage({
               {campaigns.length === 0 ? (
                 <EmptyState className="mt-3">{dict.organizations.noCampaigns}</EmptyState>
               ) : (
-                <ul className="mt-4 grid gap-5 sm:grid-cols-2">
+                <ul className="mt-4 grid grid-cols-1 gap-5 sm:grid-cols-2">
                   {campaigns.map((campaign) => (
                     <Card as="li" key={campaign.id} className="flex h-full flex-col p-5">
                       <div className="flex items-start justify-between gap-2">

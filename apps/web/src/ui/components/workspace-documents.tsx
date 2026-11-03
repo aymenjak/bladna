@@ -122,7 +122,7 @@ export function UploadDocumentForm({ locale, orgId }: { locale: LocaleCode; orgI
         {dict.workspace.documents.uploadTitle}
       </h2>
       <p className="mt-1 text-sm text-sand-500">{dict.workspace.documents.hint}</p>
-      <form onSubmit={submit} className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <form onSubmit={submit} className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div className="sm:col-span-2 lg:col-span-1">
           <label htmlFor="doc-upload-file" className="block text-sm font-medium text-sand-700">
             {dict.workspace.documents.fileName}

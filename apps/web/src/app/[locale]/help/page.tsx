@@ -75,7 +75,10 @@ export default async function HelpPage({ params }: { params: Promise<{ locale: s
             <p className="mt-1">{dict.help.emptyBody}</p>
           </EmptyState>
         ) : (
-          <ul className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3" data-testid="help-articles">
+          <ul
+            className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3"
+            data-testid="help-articles"
+          >
             {items.map((row) => (
               <Card
                 as="li"

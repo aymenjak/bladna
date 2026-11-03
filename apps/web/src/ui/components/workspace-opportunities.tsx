@@ -463,7 +463,7 @@ function OpportunityForm({
       </h3>
       {error ? <Alert tone="danger">{error}</Alert> : null}
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Input
           label={form.titleAr}
           required
@@ -487,7 +487,7 @@ function OpportunityForm({
         />
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Textarea
           label={form.descAr}
           required
@@ -511,7 +511,7 @@ function OpportunityForm({
         />
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Select
           label={form.type}
           value={values.type}
@@ -538,7 +538,7 @@ function OpportunityForm({
         </Select>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Select
           label={form.campaign}
           value={values.campaignId}
@@ -565,7 +565,7 @@ function OpportunityForm({
         error={fieldErrors.address}
       />
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Input
           label={form.startDate}
           type="date"
@@ -589,7 +589,7 @@ function OpportunityForm({
         />
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
         <Input
           label={form.capacity}
           type="number"
@@ -672,7 +672,7 @@ function OpportunityForm({
         ) : null}
         {values.requirements.map((requirement, index) => (
           <div key={index} className="space-y-3 rounded-lg border border-sand-200 bg-white p-3">
-            <div className="grid gap-3 sm:grid-cols-4">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-4">
               <Select
                 label={form.requirementType}
                 value={requirement.type}
@@ -783,7 +783,7 @@ function OpportunityForm({
         {values.benefits.map((benefit, index) => (
           <div
             key={index}
-            className="grid gap-3 rounded-lg border border-sand-200 bg-white p-3 sm:grid-cols-4"
+            className="grid grid-cols-1 gap-3 rounded-lg border border-sand-200 bg-white p-3 sm:grid-cols-4"
           >
             <Select
               label={form.benefitType}
@@ -876,7 +876,7 @@ function OpportunityForm({
         ) : null}
         {values.questions.map((question, index) => (
           <div key={index} className="space-y-3 rounded-lg border border-sand-200 bg-white p-3">
-            <div className="grid gap-3 sm:grid-cols-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               <Input
                 label={form.promptAr}
                 required

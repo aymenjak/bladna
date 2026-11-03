@@ -16,10 +16,10 @@ const LOCALES = ['ar', 'fr', 'en'] as const;
 describe('sitemap', () => {
   const entries = sitemap();
 
-  it('emits 3 locales × 19 static paths = 57 unique URLs', () => {
-    expect(entries).toHaveLength(57);
+  it('emits 3 locales × 20 static paths = 60 unique URLs', () => {
+    expect(entries).toHaveLength(60);
     const urls = entries.map((entry) => entry.url);
-    expect(new Set(urls).size).toBe(57);
+    expect(new Set(urls).size).toBe(60);
     for (const url of urls) {
       expect(url).toMatch(/^https:\/\/bladna\.org\/(ar|fr|en)(\/|$)/);
     }
@@ -40,7 +40,7 @@ describe('sitemap', () => {
         if (entry.url.startsWith(prefix)) paths.add(entry.url.slice(prefix.length));
       }
     }
-    expect(paths.size).toBe(19);
+    expect(paths.size).toBe(20);
     for (const path of paths) {
       const page = join(
         process.cwd(),

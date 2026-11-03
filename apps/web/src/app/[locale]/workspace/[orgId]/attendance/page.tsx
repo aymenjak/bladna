@@ -96,8 +96,15 @@ interface RecordsResult {
   meta: PageMeta;
 }
 
+/** Public directory row — names live under `user` (GET /volunteers). */
+interface DirectoryVolunteer {
+  id: string;
+  volunteerId: string;
+  user: { firstName: string; lastName: string };
+}
+
 interface VolunteersResult {
-  items: VolunteerOption[];
+  items: DirectoryVolunteer[];
   meta: PageMeta;
 }
 
@@ -224,7 +231,12 @@ export default async function AttendancePage({
 
   const volunteerOptions = new Map<string, VolunteerOption>();
   for (const item of volunteers?.items ?? []) {
-    volunteerOptions.set(item.id, item);
+    volunteerOptions.set(item.id, {
+      id: item.id,
+      volunteerId: item.volunteerId,
+      firstName: item.user.firstName,
+      lastName: item.user.lastName,
+    });
   }
   for (const row of records.items) {
     if (!volunteerOptions.has(row.volunteerProfile.id)) {

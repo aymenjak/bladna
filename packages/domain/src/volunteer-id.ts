@@ -25,7 +25,9 @@ export function parseVolunteerIdFormat(format?: string | null): VolunteerIdForma
     /^\{(?<prefix>[A-Z0-9]{1,8})\}-\{(?<region>[A-Z0-9]{1,8})\}-\{SEQ:(?<width>\d{1,3})\}$/.exec(
       format.trim().toUpperCase(),
     );
-  if (!match?.groups) {
+  // The bare template (literal PREFIX/REGION placeholders) is not a real
+  // format — treat it like "unset" instead of minting PREFIX-REGION-000001.
+  if (!match?.groups || (match.groups.prefix === 'PREFIX' && match.groups.region === 'REGION')) {
     return { ...DEFAULT_VOLUNTEER_ID_FORMAT };
   }
   return {

@@ -306,3 +306,40 @@ html[lang='ar'] body {
     transform: none !important;
   }
 }
+
+/* "Start here" infographic (home): the rail fills toward the highlighted
+ * step, the current node pulses, and the live dot pings. Motion only — with
+ * reduced motion the diagram renders fully drawn and still. */
+@keyframes start-here-glow {
+  0% {
+    box-shadow: 0 0 0 0 rgb(21 128 61 / 0.45);
+  }
+  70% {
+    box-shadow: 0 0 0 14px rgb(21 128 61 / 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgb(21 128 61 / 0);
+  }
+}
+
+@keyframes start-here-ping {
+  75%,
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .start-here-rail {
+    transition: width 700ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .start-here-pulse {
+    animation: start-here-glow 2.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  .start-here-live {
+    animation: start-here-ping 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+}

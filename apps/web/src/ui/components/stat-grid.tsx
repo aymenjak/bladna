@@ -59,8 +59,15 @@ export function StatGrid({
             ) : null}
             <dt className="text-xs font-semibold text-sand-600">{item.label}</dt>
           </div>
-          <dd className="mt-1.5 text-3xl font-bold tabular-nums text-sand-900">
-            <span className="block truncate">{item.value}</span>
+          <dd
+            className={`mt-1.5 font-bold tabular-nums text-sand-900 ${
+              // Long identifiers (e.g. BLD-ALG-000001) step down so they never truncate.
+              item.value.length > 9 ? 'text-xl leading-9' : 'text-3xl'
+            }`}
+          >
+            <span dir="auto" className="block truncate">
+              {item.value}
+            </span>
             {item.hint ? (
               <span className="mt-0.5 block truncate text-xs font-normal text-sand-500">
                 {item.hint}

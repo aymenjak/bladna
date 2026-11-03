@@ -254,7 +254,7 @@ export default async function InternationalPassportPage({
         statsEmpty ? (
           <EmptyState>{dict.international.passportEmpty}</EmptyState>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <Stat label={dict.international.countriesVisited} value={String(stats.countries)} />
             <Stat label={dict.international.programsLabel} value={String(stats.programs)} />
             <Stat

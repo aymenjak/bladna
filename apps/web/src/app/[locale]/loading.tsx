@@ -21,7 +21,7 @@ export default async function LocaleLoading() {
       {/* Page anatomy per docs/DESIGN.md §4: title, lede, then the content grid */}
       <Skeleton className="h-8 w-56" />
       <Skeleton className="h-4 w-80" />
-      <div className="grid gap-5 pt-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-5 pt-6 sm:grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: 6 }).map((_, index) => (
           <Card key={index} className="p-5">
             <Skeleton className="h-4 w-2/3" />

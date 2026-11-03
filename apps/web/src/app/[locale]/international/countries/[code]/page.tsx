@@ -104,7 +104,7 @@ export default async function InternationalCountryPage({
           <EmptyState>{dict.international.empty}</EmptyState>
         </div>
       ) : (
-        <ul className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {items.map((item) => (
             <OpportunityCardIntl key={item.id} locale={locale} item={item} context="country" />
           ))}

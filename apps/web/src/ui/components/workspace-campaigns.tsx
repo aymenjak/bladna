@@ -207,7 +207,7 @@ function CampaignForm({
         error={fieldErrors.goal}
       />
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Input
           label={labels.startLabel}
           type="date"
@@ -226,7 +226,7 @@ function CampaignForm({
         />
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Input
           label={labels.volunteerTargetLabel}
           type="number"
@@ -254,7 +254,7 @@ function CampaignForm({
         />
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Input
           label={labels.budgetLabel}
           type="number"

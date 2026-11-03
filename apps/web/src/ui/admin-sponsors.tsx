@@ -220,7 +220,7 @@ export function SponsorsSection({ locale, canManage }: { locale: LocaleCode; can
         <Card>
           <CardTitle>{submitLabel}</CardTitle>
           <form onSubmit={(event) => void submit(event)} className="mt-3 space-y-3">
-            <div className="grid gap-3 sm:grid-cols-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               <Input
                 label={dict.admin.sponsorAdmin.legalName}
                 required
@@ -241,7 +241,7 @@ export function SponsorsSection({ locale, canManage }: { locale: LocaleCode; can
                 onChange={(event) => setForm({ ...form, contactEmail: event.target.value })}
               />
             </div>
-            <div className="grid gap-3 sm:grid-cols-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               <Input
                 label={dict.admin.sponsorAdmin.contactPhone}
                 value={form.contactPhone}

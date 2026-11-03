@@ -10,6 +10,7 @@ export default tseslint.config(
       '**/dist/**',
       '**/coverage/**',
       'packages/database/src/generated/**',
+      'var/**',
       '**/*.d.ts',
     ],
   },
@@ -44,6 +45,8 @@ export default tseslint.config(
       '**/*.spec.ts',
       'scripts/**/*.ts',
       'packages/database/src/seed.ts',
+      'packages/database/src/seed-rich.ts',
+      'packages/database/src/seed-international.ts',
     ],
     rules: {
       'no-console': 'off',

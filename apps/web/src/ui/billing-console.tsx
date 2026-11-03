@@ -344,7 +344,7 @@ export function BillingConsole({
 
       {/* Organization selector — only the caller's own memberships appear. */}
       <Card>
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Select
             id="billing-org"
             label={dict.billing.orgLabel}
@@ -437,7 +437,7 @@ export function BillingConsole({
       {/* Plans — pricing comes from data, never hardcoded. */}
       <Card>
         <CardTitle>{dict.billing.plansTitle}</CardTitle>
-        <div className="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {plans.map((plan) => {
             const action = planActionFor(subscription?.plan.tier ?? null, plan.tier);
             return (

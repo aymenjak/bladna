@@ -140,7 +140,7 @@ export function CampaignContribute({
           {error ? <Alert tone="danger">{error}</Alert> : null}
           {notice ? <Alert tone="success">{notice}</Alert> : null}
           <form onSubmit={submit} noValidate className="space-y-3">
-            <div className="grid gap-3 sm:grid-cols-3">
+            <div className="grid grid-cols-1 gap-3">
               <label className="block">
                 <span className="text-sm font-medium text-sand-700">
                   {dict.campaigns.contributeAmount} ({currency})

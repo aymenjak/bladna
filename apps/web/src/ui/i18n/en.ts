@@ -30,6 +30,7 @@ export const en: Dictionary = {
     help: 'Help',
     terms: 'Terms',
     privacy: 'Privacy',
+    credits: 'Photo credits',
   },
   landing: {
     heroTitle: 'No good deed goes unrecorded.',
@@ -106,6 +107,86 @@ export const en: Dictionary = {
         title: 'A space of trust',
         body: 'Everyone works from the same verified record — citizen, volunteer, initiative, association, company and authority alike.',
       },
+    },
+    startHere: {
+      eyebrow: 'Quick guide',
+      title: 'BLADNA in one minute: who are you?',
+      body: 'Pick your role to see your path, step by step.',
+      rolesLabel: 'Choose your role',
+      roles: [
+        {
+          key: 'volunteer',
+          label: 'I’m a volunteer',
+          tagline: 'I want to help and have my effort count',
+          steps: [
+            {
+              title: 'Create your account',
+              body: 'It takes two minutes, and you get your own volunteer number.',
+            },
+            { title: 'Pick an initiative', body: 'Filter by wilaya and cause, then apply.' },
+            {
+              title: 'Take part and check in',
+              body: 'Scan the QR code on site to confirm you were there.',
+            },
+            {
+              title: 'Get your certificate',
+              body: 'The organization confirms your hours and a verifiable certificate is issued in your name.',
+            },
+          ],
+          liveLabel: 'initiatives published right now',
+          cta: 'Create my account',
+          href: '/register',
+        },
+        {
+          key: 'organization',
+          label: 'I’m an organization',
+          tagline: 'I want to run initiatives and find volunteers',
+          steps: [
+            {
+              title: 'Register your organization',
+              body: 'Create an organization account and invite your team.',
+            },
+            {
+              title: 'Get verified',
+              body: 'We review your documents so you earn the “verified” badge.',
+            },
+            {
+              title: 'Publish your initiative',
+              body: 'List the volunteers and support you need, and receive applications.',
+            },
+            {
+              title: 'Confirm the hours',
+              body: 'Record attendance, confirm hours and issue certificates.',
+            },
+          ],
+          liveLabel: 'organizations active on the platform',
+          cta: 'Register my organization',
+          href: '/register?accountType=ORGANIZATION',
+        },
+        {
+          key: 'verifier',
+          label: 'I’m checking a certificate',
+          tagline: 'Employer, university or any institution',
+          steps: [
+            {
+              title: 'Get the code',
+              body: 'Every certificate carries a unique code — ask its holder for it.',
+            },
+            { title: 'Open the verify page', body: 'No account needed.' },
+            {
+              title: 'Enter the code',
+              body: 'It is matched against the original record instantly.',
+            },
+            {
+              title: 'Read the result',
+              body: 'Who issued it, and whether it is valid or revoked.',
+            },
+          ],
+          liveLabel: 'valid certificates you can verify',
+          cta: 'Verify a certificate',
+          href: '/verify',
+        },
+      ],
     },
     pillarsTitle: 'One platform, three guarantees',
     pillars: {
@@ -697,6 +778,44 @@ export const en: Dictionary = {
     contributionCancelled: 'Your contribution has been cancelled.',
     bankTransferHint:
       'Transfers go by bank transfer directly to the organization; the platform records your pledge and the organization confirms it — no online payment is processed here.',
+    explainerTitle: 'What is a campaign?',
+    explainerSteps: [
+      {
+        title: 'A big goal run by a verified organization',
+        body: 'A campaign groups several initiatives around one goal, such as “Warm winter” or “Green Algeria”.',
+      },
+      {
+        title: 'Give your time',
+        body: 'Join the campaign, then apply to one of its initiatives — your hours are counted.',
+      },
+      {
+        title: 'Support it financially',
+        body: 'Pledge an amount transferred straight to the organization’s bank account; the total is shown transparently.',
+      },
+    ],
+    viewDetails: 'View campaign',
+    organizedBy: 'Organized by',
+    daysLeft: '{n} days left',
+    startsIn: 'Starts in {n} days',
+    endsToday: 'Ends today',
+    ended: 'Campaign ended',
+    progressOf: '{value} of {target}',
+    initiatives: 'initiatives',
+    volunteersProgress: 'Volunteers on board',
+    fundingProgress: 'Confirmed funding',
+    howToJoinTitle: 'How do I take part in this campaign?',
+    howToJoinSteps: [
+      { title: 'Join the campaign', body: 'Click “Join” to follow its news and new initiatives.' },
+      {
+        title: 'Pick an initiative',
+        body: 'Apply to one of the linked initiatives below, by wilaya and availability.',
+      },
+      {
+        title: 'Take part or support',
+        body: 'Show up on site to get your hours certified, or pledge a contribution.',
+      },
+    ],
+    activeCount: 'active campaigns',
     contributionStatuses: {
       PENDING: 'Awaiting confirmation',
       CONFIRMED: 'Confirmed',
@@ -2176,7 +2295,7 @@ export const en: Dictionary = {
       title: 'Terms of service',
       intro:
         'These terms govern your use of BLADNA — the volunteer identity, verified experience and opportunities platform.',
-      updated: 'Last updated: 23 September 2026',
+      updated: 'Last updated: 3 November 2026',
       sections: [
         {
           heading: '1. Who we are',
@@ -2184,7 +2303,7 @@ export const en: Dictionary = {
         },
         {
           heading: '2. Your account',
-          body: 'You must provide accurate information and keep your credentials secret. You are responsible for everything that happens under your account. Organization representatives confirm that they are authorized to act for the organization they register. You must be at least 16 years old, or have a guardian’s consent where the law requires it.',
+          body: 'You must provide accurate information and keep your credentials secret. You are responsible for everything that happens under your account. Organization representatives confirm that they are authorized to act for the organization they register. You must be at least 16 years old. Under 19 (the age of majority in Algeria), you need the consent of a parent or legal guardian, as required by Law 18-07.',
         },
         {
           heading: '3. Acceptable use',
@@ -2210,13 +2329,17 @@ export const en: Dictionary = {
           heading: '8. Liability',
           body: 'The service is provided “as is”. To the extent permitted by law, we are not liable for indirect or consequential damages, or for content published by organizations. Nothing in these terms limits rights you have under applicable Algerian consumer law.',
         },
+        {
+          heading: '9. Governing law',
+          body: 'These terms are governed by Algerian law. Any dispute that cannot be settled amicably falls under the jurisdiction of the competent Algerian courts.',
+        },
       ],
     },
     privacy: {
       title: 'Privacy policy',
       intro:
         'This policy explains what personal data BLADNA collects, why it is processed, and the rights you have over it.',
-      updated: 'Last updated: 23 September 2026',
+      updated: 'Last updated: 3 November 2026',
       sections: [
         {
           heading: '1. Data we collect',
@@ -2240,17 +2363,41 @@ export const en: Dictionary = {
         },
         {
           heading: '6. Your rights',
-          body: 'You can access and correct your data in settings, export your record through your profile, control what is public in the privacy switches, and request account deletion. For anything you cannot resolve yourself, contact support through the Safety page.',
+          body: 'Under Law 18-07 you have the right to be informed, to access and correct your data, to object to its processing for legitimate reasons, to withdraw a consent at any time, and to request deletion. You can do most of this yourself in settings and the privacy switches, and export your record from your profile. For anything else, contact us through the Safety page; we answer within the legal deadlines. You may also lodge a complaint with the National Authority for the Protection of Personal Data (ANPDP).',
         },
         {
           heading: '7. Security',
-          body: 'Passwords are hashed, sessions are revocable per device, two-factor authentication is available for every account and required for staff actions, all writes to sensitive records are validated and audited, and cross-origin mutations are rejected. No system is perfectly secure, but these controls are enforced in code, not policy alone.',
+          body: 'Passwords are hashed with scrypt and never stored in clear; session, reset and attendance tokens are stored only as SHA-256 fingerprints; two-factor secrets are encrypted at rest with AES-256-GCM; connections use HTTPS and authentication cookies are HttpOnly and Secure. Sessions are revocable per device, two-factor authentication is available for every account and required for staff actions, and every write to sensitive records is validated and audited. No system is perfectly secure, but these controls are enforced in code, not policy alone.',
         },
         {
           heading: '8. Contact',
           body: 'Questions about this policy or your data can be raised from the Safety page. If you have a concern about how your data is handled, tell us first so we can investigate and respond.',
         },
+        {
+          heading: '9. Legal framework',
+          body: 'Personal data is processed in accordance with Law No. 18-07 of 10 June 2018 on the protection of natural persons in the processing of personal data. The operator of this deployment is the data controller and is responsible for the prior declaration of the processing to the National Authority for the Protection of Personal Data (ANPDP).',
+        },
+        {
+          heading: '10. Transfers outside Algeria',
+          body: 'Your data is not transferred outside Algeria without the authorization required by Law 18-07. International opportunities are shown for information only: your data is shared with a foreign organization only when you apply to it yourself.',
+        },
+        {
+          heading: '11. Cookies',
+          body: 'BLADNA only uses cookies that are strictly necessary: sign-in (session and refresh) and your language choice. There are no advertising or tracking cookies.',
+        },
+        {
+          heading: '12. Minors',
+          body: 'Volunteers under 19 may only register with the consent of a parent or legal guardian, who can exercise the rights described above on their behalf.',
+        },
       ],
+    },
+    credits: {
+      title: 'Photo credits',
+      intro:
+        'Every photo on BLADNA is a real photo from Algeria, published under an open licence on Wikimedia Commons. We thank their authors and credit them here as the licence requires.',
+      author: 'Author',
+      license: 'Licence',
+      source: 'Source',
     },
   },
   errors: {

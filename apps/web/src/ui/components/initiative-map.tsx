@@ -257,6 +257,10 @@ export function InitiativeMap({
         [ALGERIA_BBOX.minLat, ALGERIA_BBOX.minLng],
         [ALGERIA_BBOX.maxLat, ALGERIA_BBOX.maxLng],
       );
+      // Fit/pan frame: the country bbox plus a small margin, so coastal pins
+      // and their cluster bubbles (Algiers, Oran, Annaba sit on the bbox's
+      // northern edge) are never clipped by the canvas border.
+      const viewBounds = bounds.pad(0.07);
       const map = leaflet.map(hostRef.current, {
         zoomControl: false, // the kit buttons own zooming
         attributionControl: false, // ODbL attribution below is ours
@@ -270,7 +274,7 @@ export function InitiativeMap({
         minZoom: 1,
         maxZoom: 18,
         // Hard pan constraint — the old clampView behaviour.
-        maxBounds: bounds,
+        maxBounds: viewBounds,
         maxBoundsViscosity: 1.0,
       });
 
@@ -296,7 +300,7 @@ export function InitiativeMap({
       leaflet.svgOverlay(svg, bounds).addTo(map);
 
       // Fit the frame, floor the zoom at it, arm the search-area gate.
-      applyFit(map, bounds);
+      applyFit(map, viewBounds);
 
       const group = leaflet.layerGroup().addTo(map);
       // Zoom gates "search this area"; every view change also re-clusters the
@@ -307,7 +311,7 @@ export function InitiativeMap({
       });
       map.on('moveend', () => setViewTick((tick) => tick + 1));
 
-      boundsRef.current = bounds;
+      boundsRef.current = viewBounds;
       mapRef.current = map;
       leafletRef.current = leaflet;
       groupRef.current = group;
@@ -489,7 +493,7 @@ export function InitiativeMap({
   };
 
   return (
-    <div className="grid gap-6 lg:grid-cols-3">
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
       <div
         role="region"
         aria-label={dict.nav.map}

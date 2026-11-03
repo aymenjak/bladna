@@ -1,12 +1,25 @@
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { isAppError, type CampaignStatus, type LocaleCode } from '@bladna/types';
 import { Card, EmptyState } from '@bladna/ui';
 import { getDictionary, isLocale } from '@/ui/i18n';
-import { formatDate } from '@/ui/format';
+import { formatDate, formatNumber } from '@/ui/format';
 import { StatusBadge } from '@/ui/status';
 import { publicList as listCampaigns } from '@/server/modules/campaigns';
 import { invoke } from '@/server/ssr';
 import { PageMasthead } from '@/ui/components/page-masthead';
+import { ProgressBar, campaignTiming } from '@/ui/components/campaign-meta';
+import {
+  ArrowRightIcon,
+  CalendarIcon,
+  CompassIcon,
+  HandshakeIcon,
+  HeartIcon,
+  ShieldCheckIcon,
+  UsersIcon,
+} from '@/ui/components/icons';
+
+const EXPLAINER_ICONS = [ShieldCheckIcon, UsersIcon, HeartIcon] as const;
 
 export const dynamic = 'force-dynamic';
 
@@ -105,6 +118,38 @@ export default async function CampaignsPage({
     <>
       <PageMasthead title={dict.campaigns.title} subtitle={dict.campaigns.subtitle} />
       <div className="mx-auto max-w-6xl px-4 pt-6 pb-10">
+        {/* "What is a campaign?" — three illustrated cards so a first-time
+            visitor understands the page before reading any campaign. */}
+        <section aria-labelledby="campaigns-explainer" className="mt-4">
+          <h2 id="campaigns-explainer" className="text-lg font-bold text-sand-900">
+            {dict.campaigns.explainerTitle}
+          </h2>
+          <ol className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
+            {dict.campaigns.explainerSteps.map((step, i) => {
+              const Icon = EXPLAINER_ICONS[i] ?? HandshakeIcon;
+              return (
+                <li
+                  key={step.title}
+                  className="flex gap-4 rounded-card border border-brand-100 bg-brand-50/60 p-4"
+                >
+                  <span className="relative grid size-12 shrink-0 place-items-center rounded-full bg-brand-700 text-white">
+                    <Icon className="size-6" />
+                    <span className="absolute -top-1 -end-1 grid size-5 place-items-center rounded-full bg-clay-500 text-[11px] font-bold">
+                      {formatNumber(i + 1, locale)}
+                    </span>
+                  </span>
+                  <span>
+                    <span className="block font-semibold text-sand-900">{step.title}</span>
+                    <span className="mt-1 block text-sm leading-relaxed text-sand-600">
+                      {step.body}
+                    </span>
+                  </span>
+                </li>
+              );
+            })}
+          </ol>
+        </section>
+
         {/* Filters — plain GET form, works without JS */}
         <form
           method="get"
@@ -150,61 +195,112 @@ export default async function CampaignsPage({
           </button>
         </form>
 
-        {/* Results */}
+        {/* Results — each card is one link to the campaign page: cover,
+            timing, organizer, volunteers progress and the initiatives count. */}
         {items.length === 0 ? (
           <EmptyState className="mt-12">{dict.campaigns.empty}</EmptyState>
         ) : (
-          <ul className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {items.map((item) => (
-              <Card as="li" key={item.id} className="flex h-full flex-col p-5">
-                <div className="flex items-start justify-between gap-2">
-                  <StatusBadge
-                    status={item.status}
-                    label={dict.campaigns.statuses[item.status] ?? item.status}
-                  />
-                  {item.organization.verificationStatus === 'VERIFIED' ? (
-                    <span className="rounded-full bg-brand-100 px-2.5 py-0.5 text-xs font-semibold text-brand-800">
-                      {dict.common.verified}
-                    </span>
-                  ) : null}
-                </div>
-                <h2 className="mt-3 text-base font-semibold leading-snug text-sand-900">
-                  {item.name}
-                </h2>
-                <p className="mt-1 text-sm text-sand-500">{item.organization.name}</p>
-                {item.description ? (
-                  <p className="mt-2 line-clamp-3 text-sm text-sand-600">{item.description}</p>
-                ) : null}
-                <div className="mt-auto flex flex-wrap gap-x-4 gap-y-1 border-t border-sand-100 pt-3 text-xs text-sand-500">
-                  <span>
-                    {dict.common.startDate}: {formatDate(item.startDate, locale)}
-                  </span>
-                  {item.endDate ? (
-                    <span>
-                      {dict.common.endDate}: {formatDate(item.endDate, locale)}
-                    </span>
-                  ) : null}
-                  <span>
-                    {dict.campaigns.participants}: {item._count.participants}
-                  </span>
-                  {item.volunteerTarget !== null ? (
-                    <span>
-                      {dict.campaigns.volunteersTarget}: {item.volunteerTarget}
-                    </span>
-                  ) : null}
-                  {item.hourTarget !== null ? (
-                    <span>
-                      {dict.campaigns.hoursTarget}: {item.hourTarget}
-                    </span>
-                  ) : null}
-                  {item.beneficiaryTarget !== null ? (
-                    <span>
-                      {dict.campaigns.beneficiariesTarget}: {item.beneficiaryTarget}
-                    </span>
-                  ) : null}
-                </div>
-              </Card>
-            ))}
+          <ul className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {items.map((item) => {
+              const timing = campaignTiming(item.startDate, item.endDate, dict.campaigns, locale);
+              const href = `/${locale}/campaigns/${item.id}`;
+              return (
+                <Card
+                  as="li"
+                  key={item.id}
+                  className="group relative flex h-full flex-col overflow-hidden transition hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-md"
+                >
+                  <div className="relative aspect-[16/9] overflow-hidden bg-sand-100">
+                    {item.coverImage ? (
+                      <img
+                        src={item.coverImage}
+                        alt=""
+                        loading="lazy"
+                        className="size-full object-cover transition duration-500 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="grid size-full place-items-center bg-gradient-to-br from-brand-700 to-brand-900">
+                        <HeartIcon className="size-10 text-brand-200" />
+                      </div>
+                    )}
+                    <div className="absolute inset-x-3 top-3 flex items-start justify-between gap-2">
+                      <StatusBadge
+                        status={item.status}
+                        label={dict.campaigns.statuses[item.status] ?? item.status}
+                      />
+                      {timing.label ? (
+                        <span
+                          className={`rounded-full px-2.5 py-0.5 text-xs font-semibold shadow-sm ${
+                            timing.tone === 'ended'
+                              ? 'bg-sand-900/80 text-white'
+                              : 'bg-white/95 text-brand-800'
+                          }`}
+                        >
+                          {timing.label}
+                        </span>
+                      ) : null}
+                    </div>
+                  </div>
+
+                  <div className="flex flex-1 flex-col p-5">
+                    <p className="flex items-center gap-1.5 text-xs font-medium text-sand-500">
+                      {item.organization.verificationStatus === 'VERIFIED' ? (
+                        <ShieldCheckIcon className="size-4 text-brand-600" />
+                      ) : null}
+                      <span className="truncate">
+                        {dict.campaigns.organizedBy} {item.organization.name}
+                      </span>
+                    </p>
+                    <h2
+                      dir="auto"
+                      className="mt-2 text-start text-lg font-bold leading-snug text-sand-900"
+                    >
+                      <Link
+                        href={href}
+                        className="after:absolute after:inset-0 hover:text-brand-800 focus-visible:outline-none"
+                      >
+                        {item.name}
+                      </Link>
+                    </h2>
+                    {item.description ? (
+                      <p
+                        dir="auto"
+                        className="mt-2 line-clamp-2 text-start text-sm leading-relaxed text-sand-600"
+                      >
+                        {item.description}
+                      </p>
+                    ) : null}
+
+                    <div className="mt-4">
+                      <ProgressBar
+                        label={dict.campaigns.volunteersProgress}
+                        value={item._count.participants}
+                        target={item.volunteerTarget}
+                        locale={locale}
+                        copy={dict.campaigns}
+                      />
+                    </div>
+
+                    <div className="mt-auto flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-sand-100 pt-3 text-xs text-sand-500">
+                      <span className="inline-flex items-center gap-1">
+                        <CalendarIcon className="size-3.5" />
+                        {formatDate(item.startDate, locale)}
+                        {item.endDate ? ` – ${formatDate(item.endDate, locale)}` : ''}
+                      </span>
+                      <span className="inline-flex items-center gap-1">
+                        <CompassIcon className="size-3.5" />
+                        {formatNumber(item._count.opportunities, locale)}{' '}
+                        {dict.campaigns.initiatives}
+                      </span>
+                      <span className="ms-auto inline-flex items-center gap-1 font-semibold text-brand-700">
+                        {dict.campaigns.viewDetails}
+                        <ArrowRightIcon className="size-3.5 rtl:rotate-180" />
+                      </span>
+                    </div>
+                  </div>
+                </Card>
+              );
+            })}
           </ul>
         )}
 

@@ -179,7 +179,7 @@ export function ExperienceForm({ locale }: { locale: LocaleCode }) {
           {error ? <Alert tone="danger">{error}</Alert> : null}
           {sent ? <Alert tone="success">{dict.international.experienceSent}</Alert> : null}
 
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Input
               label={dict.international.experienceOrg}
               required
