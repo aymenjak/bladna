@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { signIn } from './helpers';
+import { SEEDED, signIn } from './helpers';
 
 // Clipboard round-trip: the Copy button writes, the page reads it back.
 test.use({ permissions: ['clipboard-read', 'clipboard-write'] });
@@ -53,7 +53,7 @@ test('the shareable conversation link prefills the recipient and opens the threa
   expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(link);
 
   // Opening the org's link prefills the recipient — no UUID hunting here.
-  const orgUserId = '669e91a9-bf1f-479d-9c49-2ee6c77094eb'; // seeded org owner
+  const orgUserId = SEEDED.orgOwnerId; // seeded org owner
   await page.goto(`/en/messages?to=${orgUserId}`);
   await expect(page.getByLabel('Recipient user ID')).toHaveValue(orgUserId);
 

@@ -7,8 +7,23 @@ import '../../scripts/e2e-env';
 
 export const REPO_ROOT = path.resolve(__dirname, '..', '..');
 export const DEMO_PASSWORD = 'Sahra-2026-Atlas!';
+/**
+ * Seeded identifiers, read from the database once per worker
+ * (scripts/e2e-seed-ids.ts): the seed mints random UUIDs and certificate
+ * numbers, so nothing here is pinned to one particular `db:seed` run.
+ */
+export const SEEDED: { orgId: string; orgOwnerId: string; certificateNumber: string } = JSON.parse(
+  execFileSync(
+    process.execPath,
+    [
+      path.join(REPO_ROOT, 'node_modules', 'tsx', 'dist', 'cli.mjs'),
+      path.join(REPO_ROOT, 'scripts', 'e2e-seed-ids.ts'),
+    ],
+    { cwd: REPO_ROOT, encoding: 'utf8', env: process.env },
+  ),
+);
 /** Seeded organization behind org@bladna.dz (packages/database/src/seed.ts). */
-export const ORG_ID = '0a88ce14-ba19-45e4-ac2a-1b75ea467f17';
+export const ORG_ID = SEEDED.orgId;
 
 /**
  * One fresh RFC 6238 code for a TOTP-protected demo account, minted by the

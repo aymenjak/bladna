@@ -19,6 +19,10 @@
 // 4. P20: drops the previous run's report on the seeded initiative (see
 //    scripts/e2e-ensure-clean-report.ts) — `POST /reports` refuses a second
 //    open report on the same target, so safety.spec.ts can file every run.
+//
+// 5. Enrols TOTP on the privileged demo accounts when a reset database has
+//    none yet (see scripts/e2e-ensure-totp.ts), so the `mfa: true` sign-ins
+//    meet their code step.
 import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 import './e2e-env';
@@ -68,6 +72,15 @@ function refreshReportFixture(): void {
   );
 }
 
+/** Step 5 — TOTP on org@/admin@ after a database reset. */
+function ensureTotpFixture(): void {
+  const cli = path.join(REPO_ROOT, 'node_modules', 'tsx', 'dist', 'cli.mjs');
+  execFileSync(process.execPath, [cli, path.join(REPO_ROOT, 'scripts', 'e2e-ensure-totp.ts')], {
+    cwd: REPO_ROOT,
+    stdio: 'inherit',
+  });
+}
+
 export default async function globalSetup(): Promise<void> {
   for (let attempt = 0; attempt < 2; attempt += 1) {
     const limited = await isAuthLimited();
@@ -76,4 +89,5 @@ export default async function globalSetup(): Promise<void> {
   }
   refreshOffersFixture();
   refreshReportFixture();
+  ensureTotpFixture();
 }

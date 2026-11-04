@@ -75,11 +75,12 @@ export const PHOTO_CREDITS: PhotoCredit[] = [
   },
   {
     file: 'youth.jpg',
-    title: 'Friendship grows again in nature dinner.jpg',
-    author: 'Oualid Hamri',
-    license: 'CC BY-SA 4.0',
-    licenseUrl: 'https://creativecommons.org/licenses/by-sa/4.0',
-    source: 'https://commons.wikimedia.org/wiki/File:Friendship_grows_again_in_nature_dinner.jpg',
+    title: 'Algerian Muslim Scouts Béni Ourthilane Kabylia.jpg (cropped)',
+    author: 'Vermondo',
+    license: 'CC BY-SA 3.0',
+    licenseUrl: 'https://creativecommons.org/licenses/by-sa/3.0',
+    source:
+      'https://commons.wikimedia.org/wiki/File:Algerian_Muslim_Scouts_B%C3%A9ni_Ourthilane_Kabylia.jpg',
   },
   {
     file: 'animal-welfare.jpg',

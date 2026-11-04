@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { SEEDED } from './helpers';
 
 /**
  * Anonymous record verification (M8 smoke) — no account, no session.
@@ -21,7 +22,7 @@ test.describe('public record verification', () => {
     await page.goto('/en/verify/certificate');
     await expect(page.getByRole('heading', { name: 'Verify a certificate' })).toBeVisible();
 
-    await page.getByTestId('verify-code').fill('BLD-CERT-2LXHUMOJTJ');
+    await page.getByTestId('verify-code').fill(SEEDED.certificateNumber);
     await page.getByRole('button', { name: 'Check' }).click();
 
     const result = page.getByTestId('verify-result');

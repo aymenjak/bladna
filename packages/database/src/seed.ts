@@ -44,8 +44,14 @@ const SEED_ENABLED = envFlag('SEED_DEMO') || envFlag('DEMO_MODE');
 const POLICY_VERSION = process.env.POLICY_VERSION ?? '2026-01-01';
 
 const ATTENDANCE_DAY = new Date('2026-09-15T00:00:00.000Z');
-const PARK_CLEANUP_START = new Date('2026-10-10T09:00:00.000Z');
-const PARK_CLEANUP_END = new Date('2026-10-10T13:00:00.000Z');
+// The flagship initiative stays open to applications whenever the seed runs:
+// it starts two weeks out (09:00–13:00 UTC), applications close 4 days before.
+const PARK_CLEANUP_DAY = new Date();
+PARK_CLEANUP_DAY.setUTCDate(PARK_CLEANUP_DAY.getUTCDate() + 14);
+const PARK_CLEANUP_START = new Date(PARK_CLEANUP_DAY.setUTCHours(9, 0, 0, 0));
+const PARK_CLEANUP_END = new Date(PARK_CLEANUP_DAY.setUTCHours(13, 0, 0, 0));
+const PARK_CLEANUP_DEADLINE = new Date(PARK_CLEANUP_START.getTime() - 4 * 86_400_000);
+PARK_CLEANUP_DEADLINE.setUTCHours(23, 59, 59, 0);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Reference data (Algeria-first: DZ country, the 58 official wilayas + capitals)
@@ -1258,7 +1264,7 @@ async function main(): Promise<void> {
         coverImage: '/photos/environment-park.jpg',
         startDate: PARK_CLEANUP_START,
         endDate: PARK_CLEANUP_END,
-        applicationDeadline: new Date('2026-10-05T23:59:59.000Z'),
+        applicationDeadline: PARK_CLEANUP_DEADLINE,
         capacity: 25,
         minimumAge: 16,
         estimatedHours: 4,
