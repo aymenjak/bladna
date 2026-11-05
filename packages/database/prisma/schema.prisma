@@ -540,6 +540,11 @@ enum DataRequestType {
   DELETE
 }
 
+enum GuardianRelationship {
+  PARENT
+  LEGAL_GUARDIAN
+}
+
 enum DataRequestStatus {
   PENDING
   IN_PROGRESS
@@ -687,6 +692,7 @@ model User {
   reportsFiled          Report[]                 @relation("ReportReporter")
   reportsAssigned       Report[]                 @relation("ReportAssignee")
   consent               PrivacyConsent[]
+  guardianConsent       GuardianConsent?
   dataRequests          DataAccessRequest[]
   deletionRequests      DeletionRequest[]
   blocked               UserBlock[]              @relation("Blocker")
@@ -2983,13 +2989,31 @@ model PrivacyConsent {
   id            String   @id @default(dbgenerated("gen_random_uuid()"))
   userId        String
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  purpose       String // terms | privacy_policy | marketing_email | data_processing
+  purpose       String // terms | privacy_policy | marketing_email | data_processing | guardian_consent
   policyVersion String
   granted       Boolean  @default(true)
   ipAddress     String?
   createdAt     DateTime @default(now())
 
   @@index([userId, purpose])
+}
+
+/// Guardian consent for an account holder under the age of majority (19 in
+/// Algeria; Law 18-07 requires a legal representative's consent for a minor's
+/// data). Declared at registration; `confirmedAt` stays null until the guardian
+/// confirms through a separate channel (planned once email delivery is wired).
+model GuardianConsent {
+  id            String               @id @default(dbgenerated("gen_random_uuid()"))
+  userId        String               @unique
+  user          User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  guardianName  String
+  relationship  GuardianRelationship
+  guardianEmail String?
+  guardianPhone String?
+  policyVersion String
+  ipAddress     String?
+  confirmedAt   DateTime?
+  createdAt     DateTime             @default(now())
 }
 
 model DataAccessRequest {

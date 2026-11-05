@@ -3,7 +3,8 @@
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useState, type FormEvent } from 'react';
-import { Alert, Button, Input } from '@bladna/ui';
+import { Alert, Button, Input, Select } from '@bladna/ui';
+import { AGE_OF_MAJORITY, MIN_REGISTRATION_AGE, ageOn } from '@bladna/validation';
 import { AuthFormSkeleton } from './auth-form-skeleton';
 import { PasswordInput } from './password-input';
 import { ApiClientError, api, errorMessageFor, safeNext } from '@/ui/api/client';
@@ -11,6 +12,15 @@ import { useFocusFirstError } from '@/ui/use-focus-first-error';
 import { getDictionary, type LocaleCode } from '@/ui/i18n';
 
 type AccountType = 'VOLUNTEER' | 'ORGANIZATION';
+type GuardianRelationship = 'PARENT' | 'LEGAL_GUARDIAN';
+
+/** Age from a yyyy-mm-dd input value, or null when empty, invalid or in the future. */
+function ageFromInput(value: string): number | null {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
+  const date = new Date(`${value}T00:00:00Z`);
+  if (Number.isNaN(date.getTime()) || date.getTime() > Date.now()) return null;
+  return ageOn(date);
+}
 
 /**
  * Registration form → POST /auth/register (201 + session cookies, then the
@@ -41,6 +51,23 @@ export function RegisterForm({
   const [consentTerms, setConsentTerms] = useState(false);
   const [consentPrivacy, setConsentPrivacy] = useState(false);
   const [consentMarketing, setConsentMarketing] = useState(false);
+  const [dateOfBirth, setDateOfBirth] = useState('');
+  const [guardianName, setGuardianName] = useState('');
+  const [guardianRelationship, setGuardianRelationship] = useState<GuardianRelationship>('PARENT');
+  const [guardianEmail, setGuardianEmail] = useState('');
+  const [guardianPhone, setGuardianPhone] = useState('');
+  const [consentGuardian, setConsentGuardian] = useState(false);
+  const age = ageFromInput(dateOfBirth);
+  // Law 18-07: under the age of majority the guardian section appears and is required.
+  const isMinor = age !== null && age >= MIN_REGISTRATION_AGE && age < AGE_OF_MAJORITY;
+  // Server issue codes (registerSchema) → readable messages.
+  const issueMessages: Record<string, string> = {
+    DATE_OF_BIRTH_INVALID: dict.auth.dateOfBirthInvalid,
+    BELOW_MINIMUM_AGE: dict.auth.belowMinimumAge,
+    GUARDIAN_REQUIRED: dict.auth.guardianRequired,
+    GUARDIAN_CONTACT_REQUIRED: dict.auth.guardianContactRequired,
+    GUARDIAN_CONSENT_REQUIRED: dict.auth.guardianConsentRequired,
+  };
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -56,17 +83,38 @@ export function RegisterForm({
       setFieldErrors({ confirm: dict.auth.passwordMismatch });
       return;
     }
+    if (age === null) {
+      setFieldErrors({ dateOfBirth: dict.auth.dateOfBirthInvalid });
+      return;
+    }
+    if (age < MIN_REGISTRATION_AGE) {
+      setFieldErrors({ dateOfBirth: dict.auth.belowMinimumAge });
+      return;
+    }
+    if (isMinor) {
+      if (guardianName.trim().length < 2) {
+        setFieldErrors({ 'guardian.fullName': dict.auth.guardianRequired });
+        return;
+      }
+      if (!guardianEmail.trim() && !guardianPhone.trim()) {
+        setFieldErrors({ 'guardian.email': dict.auth.guardianContactRequired });
+        return;
+      }
+    }
     if (!consentTerms || !consentPrivacy) {
       setError(dict.auth.consentRequired);
       return;
     }
+    if (isMinor && !consentGuardian) {
+      setError(dict.auth.guardianConsentRequired);
+      return;
+    }
 
-    const consents: Array<'terms' | 'privacy_policy' | 'data_processing' | 'marketing_email'> = [
-      'terms',
-      'privacy_policy',
-      'data_processing',
-    ];
+    const consents: Array<
+      'terms' | 'privacy_policy' | 'data_processing' | 'marketing_email' | 'guardian_consent'
+    > = ['terms', 'privacy_policy', 'data_processing'];
     if (consentMarketing) consents.push('marketing_email');
+    if (isMinor) consents.push('guardian_consent');
 
     setBusy(true);
     try {
@@ -76,6 +124,17 @@ export function RegisterForm({
         firstName,
         lastName,
         ...(phone ? { phone } : {}),
+        dateOfBirth,
+        ...(isMinor
+          ? {
+              guardian: {
+                fullName: guardianName,
+                relationship: guardianRelationship,
+                ...(guardianEmail.trim() ? { email: guardianEmail } : {}),
+                ...(guardianPhone.trim() ? { phone: guardianPhone } : {}),
+              },
+            }
+          : {}),
         preferredLanguage: locale,
         consents,
         accountType,
@@ -90,7 +149,16 @@ export function RegisterForm({
       ) {
         const errors: Record<string, string> = {};
         for (const issue of cause.details as Array<{ path?: string; message?: string }>) {
-          if (issue.path) errors[issue.path] = issue.message ?? dict.errors.validation;
+          const message =
+            (issue.message && issueMessages[issue.message]) ??
+            issue.message ??
+            dict.errors.validation;
+          if (issue.path === 'consents' || issue.path === 'guardian') {
+            setError(message);
+            setBusy(false);
+            return;
+          }
+          if (issue.path) errors[issue.path] = message;
         }
         if (Object.keys(errors).length > 0) {
           setFieldErrors(errors);
@@ -176,6 +244,64 @@ export function RegisterForm({
         onChange={(event) => setPhone(event.target.value)}
         error={fieldErrors.phone}
       />
+      <Input
+        label={dict.auth.dateOfBirth}
+        type="date"
+        name="dateOfBirth"
+        autoComplete="bday"
+        required
+        max={new Date().toISOString().slice(0, 10)}
+        hint={dict.auth.dateOfBirthHint}
+        value={dateOfBirth}
+        onChange={(event) => setDateOfBirth(event.target.value)}
+        error={fieldErrors.dateOfBirth}
+      />
+      {isMinor ? (
+        <fieldset className="space-y-3 rounded-lg border border-amber-300 bg-amber-50 p-4">
+          <legend className="px-1 text-sm font-semibold text-sand-800">
+            {dict.auth.guardianTitle}
+          </legend>
+          <p className="text-sm text-sand-700">{dict.auth.guardianIntro}</p>
+          <Input
+            label={dict.auth.guardianName}
+            name="guardianName"
+            required
+            value={guardianName}
+            onChange={(event) => setGuardianName(event.target.value)}
+            error={fieldErrors['guardian.fullName']}
+          />
+          <Select
+            label={dict.auth.guardianRelationship}
+            name="guardianRelationship"
+            value={guardianRelationship}
+            onChange={(event) =>
+              setGuardianRelationship(event.target.value as GuardianRelationship)
+            }
+          >
+            <option value="PARENT">{dict.auth.guardianParent}</option>
+            <option value="LEGAL_GUARDIAN">{dict.auth.guardianLegal}</option>
+          </Select>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <Input
+              label={dict.auth.guardianEmail}
+              type="email"
+              name="guardianEmail"
+              value={guardianEmail}
+              onChange={(event) => setGuardianEmail(event.target.value)}
+              error={fieldErrors['guardian.email']}
+            />
+            <Input
+              label={dict.auth.guardianPhone}
+              type="tel"
+              name="guardianPhone"
+              placeholder="+213 …"
+              value={guardianPhone}
+              onChange={(event) => setGuardianPhone(event.target.value)}
+              error={fieldErrors['guardian.phone']}
+            />
+          </div>
+        </fieldset>
+      ) : null}
       <PasswordInput
         locale={locale}
         label={dict.auth.password}
@@ -248,6 +374,18 @@ export function RegisterForm({
           />
           <span>{dict.auth.consentMarketing}</span>
         </label>
+        {isMinor ? (
+          <label className="flex items-start gap-2">
+            <input
+              type="checkbox"
+              name="consentGuardian"
+              className="mt-1"
+              checked={consentGuardian}
+              onChange={(event) => setConsentGuardian(event.target.checked)}
+            />
+            <span>{dict.auth.consentGuardian}</span>
+          </label>
+        ) : null}
       </div>
 
       <Button type="submit" loading={busy} className="w-full" size="lg">

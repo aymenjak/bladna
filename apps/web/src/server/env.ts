@@ -51,8 +51,14 @@ export const env = {
       '',
     );
   },
+  /**
+   * Demo mode publishes the seeded demo credentials on the login page, so a
+   * production build ignores it unless DEMO_MODE_ALLOW_PRODUCTION is also set —
+   * a second, deliberate opt-in for a local presentation (ISO 27001 A.8.31).
+   */
   get demoMode() {
-    return bool('DEMO_MODE', false);
+    if (!bool('DEMO_MODE', false)) return false;
+    return !this.isProduction || bool('DEMO_MODE_ALLOW_PRODUCTION', false);
   },
   get authSecret(): string {
     const secret = required('AUTH_SECRET');

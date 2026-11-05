@@ -227,7 +227,7 @@ disagree with a live server, `GET /api/v1/meta` wins.
 
 ## Auth (core — registered)
 
-- `POST /auth/register` — create an account (terms/privacy consent recorded)
+- `POST /auth/register` — create an account (terms/privacy consent recorded; `dateOfBirth` required, and under 19 a `guardian` plus the `guardian_consent` purpose — Law 18-07)
 - `POST /auth/login` — sign in; returns `mfaRequired: true` when a TOTP step-up is pending
 - `POST /auth/mfa/verify` — verify a TOTP code or recovery code
 - `POST /auth/refresh` — rotate the refresh token and access JWT

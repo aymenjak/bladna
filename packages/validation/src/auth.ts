@@ -9,18 +9,68 @@ import {
   uuidSchema,
 } from './common';
 
-export const registerSchema = z.object({
-  email: emailSchema,
-  password: passwordSchema,
-  firstName: nameSchema,
-  lastName: nameSchema,
-  phone: phoneSchema.optional(),
-  preferredLanguage: localeSchema.default('ar'),
-  /** consent purposes accepted at registration (§54) */
-  consents: registrationConsentsSchema,
-  /** optional role hint: volunteer (default) or organization representative */
-  accountType: z.enum(['VOLUNTEER', 'ORGANIZATION']).default('VOLUNTEER'),
-});
+/** Age of majority in Algeria (Civil Code art. 40): younger users need a guardian (Law 18-07). */
+export const AGE_OF_MAJORITY = 19;
+/** Platform policy: no accounts below this age, even with a guardian. */
+export const MIN_REGISTRATION_AGE = 13;
+
+/** Whole years between `dateOfBirth` and `reference` (birthday not yet reached → one less). */
+export function ageOn(dateOfBirth: Date, reference: Date = new Date()): number {
+  let age = reference.getUTCFullYear() - dateOfBirth.getUTCFullYear();
+  const monthDiff = reference.getUTCMonth() - dateOfBirth.getUTCMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && reference.getUTCDate() < dateOfBirth.getUTCDate())) {
+    age -= 1;
+  }
+  return age;
+}
+
+export const guardianSchema = z
+  .object({
+    fullName: z.string().trim().min(2).max(120),
+    relationship: z.enum(['PARENT', 'LEGAL_GUARDIAN']),
+    email: emailSchema.optional(),
+    phone: phoneSchema.optional(),
+  })
+  .refine((guardian) => Boolean(guardian.email || guardian.phone), {
+    message: 'GUARDIAN_CONTACT_REQUIRED',
+    path: ['email'],
+  });
+
+export const registerSchema = z
+  .object({
+    email: emailSchema,
+    password: passwordSchema,
+    firstName: nameSchema,
+    lastName: nameSchema,
+    phone: phoneSchema.optional(),
+    preferredLanguage: localeSchema.default('ar'),
+    /** required so the age rules below cannot be skipped */
+    dateOfBirth: z.coerce.date(),
+    /** required (with the `guardian_consent` purpose) when the user is under AGE_OF_MAJORITY */
+    guardian: guardianSchema.optional(),
+    /** consent purposes accepted at registration (§54) */
+    consents: registrationConsentsSchema,
+    /** optional role hint: volunteer (default) or organization representative */
+    accountType: z.enum(['VOLUNTEER', 'ORGANIZATION']).default('VOLUNTEER'),
+  })
+  .superRefine((input, ctx) => {
+    const age = ageOn(input.dateOfBirth);
+    if (Number.isNaN(age) || input.dateOfBirth.getTime() > Date.now() || age > 120) {
+      ctx.addIssue({ code: 'custom', path: ['dateOfBirth'], message: 'DATE_OF_BIRTH_INVALID' });
+      return;
+    }
+    if (age < MIN_REGISTRATION_AGE) {
+      ctx.addIssue({ code: 'custom', path: ['dateOfBirth'], message: 'BELOW_MINIMUM_AGE' });
+      return;
+    }
+    if (age >= AGE_OF_MAJORITY) return;
+    if (!input.guardian) {
+      ctx.addIssue({ code: 'custom', path: ['guardian'], message: 'GUARDIAN_REQUIRED' });
+    }
+    if (!input.consents.includes('guardian_consent')) {
+      ctx.addIssue({ code: 'custom', path: ['consents'], message: 'GUARDIAN_CONSENT_REQUIRED' });
+    }
+  });
 
 export const loginSchema = z.object({
   email: emailSchema,

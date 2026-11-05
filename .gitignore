@@ -33,3 +33,6 @@ cloudflared.exe
 packages/database/src/generated/
 design-refs/removed-from-public/*
 !design-refs/removed-from-public/logo-source-large.jpg
+
+# Encrypted database backups (scripts/backup-db.sh) — never commit
+backups/

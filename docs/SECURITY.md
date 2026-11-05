@@ -133,6 +133,12 @@ summary; where a control is partial or absent, it is stated under
   (`terms`, `privacy_policy`, `data_processing`, optional `marketing_email`)
   with the `POLICY_VERSION` and client IP (`modules/auth.ts`; checkbox UI in
   `ui/components/register-form.tsx`).
+- **Minors (Law 18-07)** — the date of birth is required at registration; under
+  19 (age of majority) the API requires a guardian (name, relationship, email or
+  phone) and the `guardian_consent` purpose, stored in `GuardianConsent`; under
+  13 registration is refused (`registerSchema` in `packages/validation/src/auth.ts`,
+  unit-tested in `guardian-consent.test.ts`). The guardian's own confirmation by
+  email/SMS is pending email delivery (`GuardianConsent.confirmedAt`).
 - **AI document gate (GDPR)** — personal documents are only ever sent to an
   external AI provider when `AI_SEND_DOCUMENTS=true`; otherwise the call fails
   with `CONFIG_ERROR` (`checkDocument`, `apps/web/src/server/infra/ai.ts`).

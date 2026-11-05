@@ -19,6 +19,7 @@ describe('validation schemas', () => {
       password: 'long-enough-password',
       firstName: 'Aymen',
       lastName: 'Bensalem',
+      dateOfBirth: '1998-04-12',
       consents: ['terms', 'privacy_policy'],
     });
     expect(parsed.email).toBe('aymen@example.com');
@@ -31,6 +32,7 @@ describe('validation schemas', () => {
       password: 'long-enough-password',
       firstName: 'A',
       lastName: 'B',
+      dateOfBirth: '1998-04-12',
       consents: ['marketing_email'],
     });
     expect(result.success).toBe(false);
@@ -43,6 +45,7 @@ describe('validation schemas', () => {
         password: 'long-enough-password',
         firstName: 'A',
         lastName: 'B',
+        dateOfBirth: '1998-04-12',
         consents: ['terms', 'privacy_policy'],
       }).success,
     ).toBe(false);
@@ -52,6 +55,7 @@ describe('validation schemas', () => {
         password: 'short',
         firstName: 'A',
         lastName: 'B',
+        dateOfBirth: '1998-04-12',
         consents: ['terms', 'privacy_policy'],
       }).success,
     ).toBe(false);

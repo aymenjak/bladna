@@ -132,6 +132,13 @@ tar -czf "backups/storage-$(date +%F).tar.gz" -C "$(dirname "${STORAGE_LOCAL_DIR
 
 ### 3.4 Schedule & retention
 
+- **Automated, encrypted dumps:** `scripts/backup-db.sh` streams `pg_dump` straight into
+  AES-256 encryption (no plaintext copy on disk), writes a SHA-256 checksum and deletes
+  dumps older than `BACKUP_KEEP_DAYS` (default 30). Run it nightly from cron or the
+  Windows Task Scheduler, e.g.
+  `BACKUP_PASSPHRASE=… BACKUP_DB_CONTAINER=bladna-db scripts/backup-db.sh`.
+  Keep the passphrase apart from the backups and from `.env`; the decrypt command is in
+  the script header.
 - Nightly DB dump + rolling 7 daily / 4 weekly copies is a reasonable starting point;
   take an additional dump **before every migration deploy**.
 - Keep dumps and the `.env` copy in separate stores (different trust domain from the app host).

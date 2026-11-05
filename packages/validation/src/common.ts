@@ -60,7 +60,9 @@ export const supportOfferStatusSchema = z.enum(SUPPORT_OFFER_STATUSES);
  * organization and sponsor registration so the bar cannot drift between them.
  */
 export const registrationConsentsSchema = z
-  .array(z.enum(['terms', 'privacy_policy', 'data_processing', 'marketing_email']))
+  .array(
+    z.enum(['terms', 'privacy_policy', 'data_processing', 'marketing_email', 'guardian_consent']),
+  )
   .min(1)
   .refine((list) => list.includes('terms') && list.includes('privacy_policy'), {
     message: 'REQUIRED_CONSENTS_MISSING',

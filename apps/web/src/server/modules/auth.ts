@@ -25,6 +25,8 @@ import { parseVolunteerIdFormat, renderVolunteerId } from '@bladna/domain';
 import { AppError, type LocaleCode, type SystemRole } from '@bladna/types';
 import { buildPageMeta, normalizePageParams, resolveLocale } from '@bladna/utils';
 import {
+  AGE_OF_MAJORITY,
+  ageOn,
   changePasswordSchema,
   enableTwoFactorSchema,
   forgotPasswordSchema,
@@ -233,6 +235,7 @@ async function register(ctx: RequestContext): Promise<unknown> {
     throw AppError.conflict('An account with this email already exists.');
   }
 
+  const isMinor = ageOn(input.dateOfBirth) < AGE_OF_MAJORITY;
   const passwordHash = await passwordHasher.hash(input.password);
   const roles: SystemRole[] = input.accountType === 'VOLUNTEER' ? ['USER', 'VOLUNTEER'] : ['USER'];
   const preferredLanguage = input.preferredLanguage.toUpperCase() as 'AR' | 'FR' | 'EN';
@@ -247,11 +250,28 @@ async function register(ctx: RequestContext): Promise<unknown> {
           firstName: input.firstName,
           lastName: input.lastName,
           phone: input.phone ?? null,
+          dateOfBirth: input.dateOfBirth,
           preferredLanguage,
           roles,
         },
         select: USER_SELECT,
       });
+
+      // Minor (Law 18-07): the schema already required a guardian and the
+      // `guardian_consent` purpose; keep who consented next to the ledger row.
+      if (isMinor && input.guardian) {
+        await tx.guardianConsent.create({
+          data: {
+            userId: user.id,
+            guardianName: input.guardian.fullName,
+            relationship: input.guardian.relationship,
+            guardianEmail: input.guardian.email ?? null,
+            guardianPhone: input.guardian.phone ?? null,
+            policyVersion: env.policyVersion,
+            ipAddress: ctx.ip === 'local' ? null : ctx.ip,
+          },
+        });
+      }
 
       // Consent ledger: purpose + policy version + IP, per §54.
       await tx.privacyConsent.createMany({
@@ -300,7 +320,7 @@ async function register(ctx: RequestContext): Promise<unknown> {
     mfaSatisfied: false,
   });
   await auditAuth(ctx, 'auth.register', created.id, {
-    metadata: { accountType: input.accountType },
+    metadata: { accountType: input.accountType, minor: isMinor },
   });
 
   const response = json(
